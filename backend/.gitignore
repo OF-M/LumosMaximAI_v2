@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.env
+data/
+!data/.gitkeep
+models/
+!models/.gitkeep
+database/lumos.db
+.pytest_cache/
