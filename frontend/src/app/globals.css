@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  --color-sensor-black: #000000;
-  --color-sensor-charcoal: #09090b;
-  --color-titanium: #E6E6E6;
-  --color-optic-amber: #D97736;
-  --color-optic-cyan: #4A90E2;
-  --color-tungsten: #1C2A39;
+  --color-sensor-black: #020617;
+  --color-sensor-charcoal: #0B1121;
+  --color-titanium: #F8FAFC;
+  --color-optic-amber: #3B82F6; /* Elektrik Mavisi */
+  --color-optic-cyan: #06B6D4;
+  --color-tungsten: #1E293B;
 }
 
 @layer base {
   html,
   body {
-    background-color: var(--color-sensor-black, #000000);
-    color: var(--color-titanium, #E6E6E6);
+    background-color: var(--color-sensor-black, #020617);
+    color: var(--color-titanium, #F8FAFC);
     overscroll-behavior: none;
   }
 }

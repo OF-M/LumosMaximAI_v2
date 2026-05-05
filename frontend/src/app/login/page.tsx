@@ -20,13 +20,7 @@ export default function LoginPage() {
       {/* Background Grid */}
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
 
-      {/* Logo */}
-      <Link href="/" className="flex items-center gap-3 mb-10 z-10 transition-transform hover:scale-105">
-        <div className="w-12 h-12 bg-black border border-neutral-800 flex items-center justify-center">
-          <Aperture className="w-6 h-6 text-optic-amber" />
-        </div>
-        <span className="text-3xl font-black tracking-tight text-white uppercase">LumosMaximAI</span>
-      </Link>
+
 
       {/* Login Card */}
       <div className="w-full max-w-md bg-sensor-charcoal border border-neutral-900 p-8 shadow-2xl relative z-10">

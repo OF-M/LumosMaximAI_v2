@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { Wand2, History } from "lucide-react";
+import Image from "next/image";
+import { History } from "lucide-react";
 
 export function Navbar() {
   return (
     <nav className="fixed top-0 w-full z-50 bg-neutral-950/80 backdrop-blur-lg border-b border-neutral-800">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 transition-transform hover:scale-105">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 shadow-[inset_0_1px_rgba(255,255,255,0.4)]">
-            <Wand2 className="w-5 h-5 text-white" />
-          </div>
+          <Image src="/logo.png" alt="LumosMaximAI Logo" width={40} height={40} className="rounded-xl shadow-lg object-cover" />
           <span className="text-xl font-bold tracking-tight text-white">LumosMaximAI</span>
         </Link>
         <div className="flex items-center gap-6">
