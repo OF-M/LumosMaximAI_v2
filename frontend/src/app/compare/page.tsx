@@ -81,7 +81,7 @@ export default function Compare() {
 
     if (errorMSG || !jobId) {
         return (
-            <main className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col items-center py-20 px-4 font-sans">
+            <main className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col items-center pt-32 pb-20 px-4 font-sans">
                 <div className="max-w-md text-center">
                     <h2 className="text-2xl font-bold mb-4 text-red-400">Error</h2>
                     <p className="text-neutral-400 mb-8">{errorMSG}</p>
@@ -94,7 +94,7 @@ export default function Compare() {
     }
 
     return (
-        <main className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col items-center py-10 px-4 font-sans overflow-hidden">
+        <main className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col items-center pt-32 pb-10 px-4 font-sans overflow-hidden">
 
             {/* Background Glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-indigo-600/10 blur-[120px] rounded-full pointer-events-none -translate-y-1/2" />

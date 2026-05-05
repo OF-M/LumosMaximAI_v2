@@ -38,7 +38,7 @@ export default function Dashboard() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col py-16 px-4 md:px-10 font-sans">
+        <main className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col pt-32 pb-16 px-4 md:px-10 font-sans">
 
             {/* Background Glow */}
             <div className="absolute top-0 right-1/4 w-full max-w-2xl h-64 bg-purple-600/10 blur-[120px] rounded-full pointer-events-none -translate-y-1/2" />

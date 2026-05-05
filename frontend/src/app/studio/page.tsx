@@ -85,7 +85,7 @@ export default function Studio() {
     }, [jobId, jobStatus]);
 
     return (
-        <main className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col items-center py-20 px-4 font-sans selection:bg-indigo-500/30">
+        <main className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col items-center pt-32 pb-20 px-4 font-sans selection:bg-indigo-500/30">
 
             {/* Background Glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-indigo-600/20 blur-[120px] rounded-full pointer-events-none -translate-y-1/2" />
