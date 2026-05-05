@@ -2,176 +2,182 @@
 
 import React from "react";
 import Link from "next/link";
-import { Sparkles, Moon, Wand2, History, ArrowRight, Video, ShieldCheck, Zap, CheckCircle2 } from "lucide-react";
+import { Camera, Aperture, SlidersHorizontal, ArrowRight, Video, ShieldCheck, Zap, CheckCircle2 } from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-50 font-sans selection:bg-indigo-500/30 overflow-x-hidden">
+    <main className="min-h-screen bg-sensor-black text-titanium font-sans selection:bg-optic-amber/30 overflow-x-hidden noise-overlay relative">
 
 
 
       {/* Hero Section */}
-      <section className="relative pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
-        {/* Deep Layer Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-indigo-600/30 blur-[150px] rounded-[100%] pointer-events-none" />
+      <section className="relative pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center z-10">
+        {/* Calibrated Grid Background */}
+        <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
 
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-medium mb-8">
-          <Sparkles className="w-4 h-4" /> LumosMaximAI 2.0 is Live
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-neutral-800 text-neutral-400 text-sm font-mono mb-8 uppercase tracking-widest relative z-10 bg-black">
+          <span className="w-2 h-2 rounded-full bg-optic-amber animate-pulse" /> LumosMaximAI 2.0 is Live
         </div>
-        <h1 className="text-6xl md:text-8xl font-black tracking-tighter max-w-4xl text-white mb-8 leading-[1.1]">
-          Bring your dark footage <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400">into the light.</span>
+        
+        <h1 className="text-6xl md:text-8xl font-black tracking-tighter max-w-4xl text-titanium mb-8 leading-[1.1] relative z-10">
+          Bring dark footage <span className="text-white relative"><span className="absolute -left-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full"></span>to the light.</span>
         </h1>
-        <p className="text-xl md:text-2xl text-neutral-400 max-w-2xl font-medium mb-12">
-          Professional-grade video denoising and extreme low-light enhancement powered by zero-reference deep learning architectures.
+        <p className="text-xl md:text-2xl text-neutral-500 max-w-2xl font-medium mb-12 relative z-10 font-mono text-sm uppercase tracking-wide">
+          Professional video denoising and extreme low-light enhancement. <br /> Powered by deep learning.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <Link href="/studio" className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-2xl text-lg font-semibold flex items-center gap-2 transition-all hover:-translate-y-1 shadow-[0_0_40px_rgba(79,70,229,0.4)]">
-            <Wand2 className="w-5 h-5" /> Start Enhancing For Free
+        <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10">
+          <Link href="/studio" className="bg-titanium text-sensor-black px-8 py-4 text-sm font-bold uppercase tracking-widest flex items-center gap-2 tactile-btn border border-titanium hover:bg-white">
+            <Aperture className="w-5 h-5" /> Start Enhancing
           </Link>
-          <Link href="#pricing" className="bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-white px-8 py-4 rounded-2xl text-lg font-medium flex items-center gap-2 transition-colors">
+          <Link href="#pricing" className="bg-black border border-neutral-800 hover:border-neutral-500 text-titanium px-8 py-4 text-sm font-mono uppercase tracking-widest flex items-center gap-2 tactile-btn transition-colors">
             View Pricing
           </Link>
         </div>
       </section>
 
       {/* Features Outline */}
-      <section className="py-24 bg-black border-y border-neutral-900 relative">
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-12">
-          <div className="space-y-4">
-            <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20">
-              <Moon className="w-6 h-6 text-indigo-400" />
+      <section className="py-24 border-y border-neutral-900 relative bg-sensor-charcoal overflow-hidden z-10">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-12">
+          
+          <div className="md:col-span-4 space-y-6 border-r border-neutral-900 pr-8">
+            <div className="text-xs font-mono text-neutral-600 uppercase tracking-widest mb-12">Feature // 01</div>
+            <div className="w-12 h-12 bg-black border border-neutral-800 flex items-center justify-center">
+              <Camera className="w-5 h-5 text-optic-amber" />
             </div>
-            <h3 className="text-xl font-bold text-white">Zero-DCE Low-Light</h3>
-            <p className="text-neutral-400 leading-relaxed">Illuminate impossibly dark surveillance footage without amplifying noise or introducing artifacting.</p>
+            <h3 className="text-2xl font-bold text-titanium">Zero-DCE Enhancement</h3>
+            <p className="text-neutral-500 leading-relaxed font-mono text-sm">Illuminate impossibly dark surveillance footage without amplifying noise or introducing artifacting.</p>
           </div>
-          <div className="space-y-4">
-            <div className="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20">
-              <Video className="w-6 h-6 text-purple-400" />
+
+          <div className="md:col-span-4 space-y-6 border-r border-neutral-900 px-4">
+            <div className="text-xs font-mono text-neutral-600 uppercase tracking-widest mb-12">Feature // 02</div>
+            <div className="w-12 h-12 bg-black border border-neutral-800 flex items-center justify-center">
+              <SlidersHorizontal className="w-5 h-5 text-optic-cyan" />
             </div>
-            <h3 className="text-xl font-bold text-white">Spatial Denoising</h3>
-            <p className="text-neutral-400 leading-relaxed">Remove heavy ISO grain from night shots or low-quality sensors securely using spatial neural networks.</p>
+            <h3 className="text-2xl font-bold text-titanium">Spatial Denoising</h3>
+            <p className="text-neutral-500 leading-relaxed font-mono text-sm">Remove heavy ISO grain from night shots securely using targeted spatial neural networks.</p>
           </div>
-          <div className="space-y-4">
-            <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
-              <ShieldCheck className="w-6 h-6 text-emerald-400" />
+
+          <div className="md:col-span-4 space-y-6 pl-4">
+            <div className="text-xs font-mono text-neutral-600 uppercase tracking-widest mb-12">Feature // 03</div>
+            <div className="w-12 h-12 bg-black border border-neutral-800 flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5 text-neutral-400" />
             </div>
-            <h3 className="text-xl font-bold text-white">Secure Local Storage</h3>
-            <p className="text-neutral-400 leading-relaxed">Your files never leave your encrypted project folder, satisfying strict regulatory & IP demands.</p>
+            <h3 className="text-2xl font-bold text-titanium">Encrypted Pipeline</h3>
+            <p className="text-neutral-500 leading-relaxed font-mono text-sm">Your files never leave your encrypted project folder, keeping everything secure and private.</p>
           </div>
+          
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-32 px-6 max-w-7xl mx-auto relative">
-        <div className="absolute right-0 top-1/4 w-[500px] h-[500px] bg-purple-600/10 blur-[150px] rounded-full pointer-events-none" />
+      {/* Pricing Specifications */}
+      <section id="pricing" className="py-32 px-6 max-w-7xl mx-auto relative z-10">
+        <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
 
-        <div className="text-center mb-20 relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Simple, transparent pricing.</h2>
-          <p className="text-lg text-neutral-400">Choose the perfect tier for your workflow.</p>
+        <div className="mb-20 relative z-10 border-b border-neutral-900 pb-8 flex justify-between items-end">
+          <div>
+            <h2 className="text-4xl md:text-5xl font-black text-titanium mb-2 tracking-tighter uppercase">Simple Pricing</h2>
+            <p className="text-sm font-mono text-neutral-500 uppercase tracking-widest">Choose the perfect tier for your workflow</p>
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 relative z-10">
+        <div className="grid md:grid-cols-3 gap-0 border border-neutral-900 relative z-10 bg-black">
 
-          {/* Free Tier */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 flex flex-col hover:border-neutral-700 transition-colors">
-            <h3 className="text-lg font-semibold text-neutral-300">Starter Core</h3>
-            <div className="mt-4 mb-8">
-              <span className="text-5xl font-bold text-white">£0</span>
-              <span className="text-neutral-500 font-medium">/mo</span>
+          {/* Starter Tier */}
+          <div className="p-10 border-b md:border-b-0 md:border-r border-neutral-900 flex flex-col hover:bg-sensor-charcoal transition-colors">
+            <h3 className="text-2xl font-bold text-titanium uppercase">Starter</h3>
+            <div className="mt-6 mb-8 font-mono">
+              <span className="text-4xl text-white">£0</span>
+              <span className="text-neutral-600 text-sm">/mo</span>
             </div>
-            <p className="text-neutral-400 text-sm mb-8 leading-relaxed">Perfect for testing the AI and evaluating the results on single clips.</p>
+            <p className="text-neutral-500 text-xs font-mono mb-10 leading-relaxed uppercase">Perfect for testing the AI on single clips.</p>
 
-            <ul className="space-y-4 mb-10 flex-grow">
-              <li className="flex items-center gap-3 text-neutral-300 text-sm">
-                <CheckCircle2 className="w-5 h-5 text-indigo-500" />
-                <span><strong>5</strong> Enhancements per month</span>
+            <ul className="space-y-4 mb-12 flex-grow border-t border-neutral-900 pt-8">
+              <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-neutral-600" />
+                <span>5 Enhancements/mo</span>
               </li>
-              <li className="flex items-center gap-3 text-neutral-300 text-sm">
-                <CheckCircle2 className="w-5 h-5 text-indigo-500" />
-                <span>Up to <strong>1080p</strong> resolution</span>
+              <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-neutral-600" />
+                <span>Max Output: 1080p</span>
               </li>
-              <li className="flex items-center gap-3 text-neutral-300 text-sm">
-                <CheckCircle2 className="w-5 h-5 text-indigo-500" />
-                <span>Standard Queue Priority</span>
+              <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-neutral-600" />
+                <span>Standard Priority</span>
               </li>
             </ul>
 
-            <Link href="/register" className="w-full text-center bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-3.5 rounded-xl transition-colors">
+            <Link href="/register" className="w-full text-center border border-neutral-800 hover:border-white text-neutral-400 hover:text-white font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
               Get Started
             </Link>
           </div>
 
-          {/* Professional Tier (Highlighted) */}
-          <div className="bg-gradient-to-b from-indigo-900/50 to-neutral-900 border border-indigo-500/50 rounded-3xl p-8 flex flex-col relative transform md:-translate-y-4 shadow-2xl shadow-indigo-900/50">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-500 text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
-              Most Popular
+          {/* Pro Tier */}
+          <div className="p-10 border-b md:border-b-0 md:border-r border-neutral-900 flex flex-col relative bg-sensor-charcoal border-t-2 border-t-optic-amber">
+            <div className="absolute top-4 right-4 bg-optic-amber text-black text-[10px] font-bold font-mono uppercase tracking-widest px-2 py-1">
+              Recommended
             </div>
-            <h3 className="text-lg font-semibold text-indigo-200">Professional</h3>
-            <div className="mt-4 mb-8">
-              <span className="text-5xl font-bold text-white">£20</span>
-              <span className="text-neutral-400 font-medium">/mo</span>
+            <h3 className="text-2xl font-bold text-white uppercase">Professional</h3>
+            <div className="mt-6 mb-8 font-mono">
+              <span className="text-4xl text-white">£20</span>
+              <span className="text-neutral-600 text-sm">/mo</span>
             </div>
-            <p className="text-indigo-200/70 text-sm mb-8 leading-relaxed">For independent creators & PI security firms needing reliable enhancement.</p>
+            <p className="text-neutral-400 text-xs font-mono mb-10 leading-relaxed uppercase">For creators needing reliable enhancement.</p>
 
-            <ul className="space-y-4 mb-10 flex-grow">
-              <li className="flex items-center gap-3 text-white text-sm">
-                <CheckCircle2 className="w-5 h-5 text-indigo-400" />
-                <span><strong>100</strong> Enhancements per month</span>
+            <ul className="space-y-4 mb-12 flex-grow border-t border-neutral-800 pt-8">
+              <li className="flex items-center gap-3 text-white text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-optic-amber" />
+                <span>100 Enhancements/mo</span>
               </li>
-              <li className="flex items-center gap-3 text-white text-sm">
-                <CheckCircle2 className="w-5 h-5 text-indigo-400" />
-                <span>Up to <strong>4K UHD</strong> resolution</span>
+              <li className="flex items-center gap-3 text-white text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-optic-amber" />
+                <span>Max Output: 4K UHD</span>
               </li>
-              <li className="flex items-center gap-3 text-white text-sm">
-                <CheckCircle2 className="w-5 h-5 text-indigo-400" />
-                <span><strong>Priority</strong> Queue Processing</span>
+              <li className="flex items-center gap-3 text-white text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-optic-amber" />
+                <span>High Priority Processing</span>
               </li>
-              <li className="flex items-center gap-3 text-white text-sm">
-                <CheckCircle2 className="w-5 h-5 text-indigo-400" />
+              <li className="flex items-center gap-3 text-white text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-optic-amber" />
                 <span>Email Support</span>
               </li>
             </ul>
 
-            <Link href="/register" className="w-full text-center bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-3.5 rounded-xl shadow-lg transition-colors">
-              Start Pro Trial
+            <Link href="/register" className="w-full text-center bg-optic-amber hover:bg-white text-black font-bold font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
+              Start Trial
             </Link>
           </div>
 
-          {/* Studio Tier */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 flex flex-col hover:border-neutral-700 transition-colors">
-            <h3 className="text-lg font-semibold text-neutral-300">Studio Max</h3>
-            <div className="mt-4 mb-8">
-              <span className="text-5xl font-bold text-white">£100</span>
-              <span className="text-neutral-500 font-medium">/mo</span>
+          {/* Studio Max */}
+          <div className="p-10 flex flex-col hover:bg-sensor-charcoal transition-colors">
+            <h3 className="text-2xl font-bold text-titanium uppercase">Studio Max</h3>
+            <div className="mt-6 mb-8 font-mono">
+              <span className="text-4xl text-white">£100</span>
+              <span className="text-neutral-600 text-sm">/mo</span>
             </div>
-            <p className="text-neutral-400 text-sm mb-8 leading-relaxed">For commercial labs needing limitless processing and advanced model tuning.</p>
+            <p className="text-neutral-500 text-xs font-mono mb-10 leading-relaxed uppercase">Commercial labs needing limitless access.</p>
 
-            <ul className="space-y-4 mb-10 flex-grow">
-              <li className="flex items-center gap-3 text-neutral-300 text-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-500" />
-                <span><strong>Unlimited</strong> Enhancements</span>
+            <ul className="space-y-4 mb-12 flex-grow border-t border-neutral-900 pt-8">
+              <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-neutral-600" />
+                <span>Unlimited Processing</span>
               </li>
-              <li className="flex items-center gap-3 text-neutral-300 text-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-500" />
-                <span>Up to <strong>8K</strong> resolution</span>
+              <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-neutral-600" />
+                <span>Max Output: 8K</span>
               </li>
-              <li className="flex items-center gap-3 text-neutral-300 text-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-500" />
-                <span>Highest GPU Priority (Instant)</span>
+              <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-neutral-600" />
+                <span>Instant Priority</span>
               </li>
-              <li className="flex items-center gap-3 text-neutral-300 text-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-500" />
+              <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
+                <span className="w-1.5 h-1.5 bg-neutral-600" />
                 <span>Custom Model Access</span>
-              </li>
-              <li className="flex items-center gap-3 text-neutral-300 text-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-500" />
-                <span>Dedicated 24/7 SL Support</span>
               </li>
             </ul>
 
-            <Link href="/register" className="w-full text-center bg-white hover:bg-neutral-200 text-neutral-900 font-semibold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
-              <Zap className="w-4 h-4" /> Go Max
+            <Link href="/register" className="w-full text-center border border-neutral-800 hover:border-white text-neutral-400 hover:text-white font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
+              Go Max
             </Link>
           </div>
 

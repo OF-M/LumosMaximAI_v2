@@ -85,37 +85,37 @@ export default function Studio() {
     }, [jobId, jobStatus]);
 
     return (
-        <main className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col items-center pt-32 pb-20 px-4 font-sans selection:bg-indigo-500/30">
+        <main className="min-h-screen bg-sensor-black text-titanium flex flex-col items-center pt-32 pb-20 px-4 font-sans selection:bg-optic-amber/30 noise-overlay relative overflow-hidden">
 
-            {/* Background Glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-indigo-600/20 blur-[120px] rounded-full pointer-events-none -translate-y-1/2" />
+            {/* Background Grid */}
+            <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
 
             {/* Top Navbar */}
-            <nav className="w-full max-w-6xl flex justify-between z-10 mb-8">
-                <Link href="/" className="flex items-center gap-2 text-neutral-400 hover:text-indigo-400 font-medium transition-all">
-                    <ArrowLeft className="w-4 h-4" /> Back to Home
+            <nav className="w-full max-w-6xl flex justify-between z-10 mb-12">
+                <Link href="/" className="flex items-center gap-2 text-neutral-500 hover:text-white font-mono text-xs uppercase tracking-widest transition-colors tactile-btn">
+                    <ArrowLeft className="w-4 h-4" /> Home
                 </Link>
-                <Link href="/dashboard" className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 hover:border-indigo-500/50 hover:bg-neutral-800 text-neutral-300 px-4 py-2 rounded-xl text-sm font-medium transition-all">
-                    <History className="w-4 h-4" /> My Dashboard
+                <Link href="/dashboard" className="flex items-center gap-2 bg-black border border-neutral-800 hover:border-neutral-500 text-neutral-300 px-4 py-2 font-mono text-xs uppercase tracking-widest transition-colors tactile-btn">
+                    <History className="w-4 h-4" /> Dashboard
                 </Link>
             </nav>
 
             <header className="text-center z-10 max-w-3xl mb-16 space-y-4">
-                <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-br from-indigo-300 via-indigo-500 to-purple-600 bg-clip-text text-transparent pb-2">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white uppercase pb-2">
                     Enhancement Studio
                 </h1>
-                <p className="text-lg md:text-xl text-neutral-400 font-medium">
-                    Upload your video to begin the deep learning enhancement process.
+                <p className="text-sm md:text-base text-neutral-500 font-mono uppercase tracking-wide">
+                    Upload your video to begin enhancing.
                 </p>
             </header>
 
-            <section className="w-full max-w-2xl bg-neutral-900/50 backdrop-blur-xl border border-neutral-800 rounded-3xl p-8 shadow-2xl z-10">
+            <section className="w-full max-w-2xl bg-sensor-charcoal border border-neutral-900 p-8 shadow-2xl z-10 relative">
 
                 {/* Upload Zone */}
                 <div
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleDrop}
-                    className="border-2 border-dashed border-neutral-700 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all duration-300 rounded-2xl p-12 text-center flex flex-col items-center justify-center cursor-pointer group group-hover"
+                    className="border border-dashed border-neutral-700 hover:border-neutral-400 bg-black transition-colors duration-300 p-12 text-center flex flex-col items-center justify-center cursor-pointer group"
                     onClick={() => document.getElementById("fileInput")?.click()}
                 >
                     <input
@@ -125,27 +125,27 @@ export default function Studio() {
                         onChange={handleFileChange}
                         className="hidden"
                     />
-                    <div className="w-20 h-20 bg-neutral-800 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:bg-indigo-600/20">
-                        <UploadCloud className="w-10 h-10 text-neutral-400 group-hover:text-indigo-400" />
+                    <div className="w-16 h-16 bg-sensor-charcoal border border-neutral-800 flex items-center justify-center mb-6 group-hover:scale-105 transition-transform duration-300">
+                        <UploadCloud className="w-6 h-6 text-neutral-500 group-hover:text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2 group-hover:text-indigo-300 transition-colors">
-                        {file ? "Change Video" : "Drag & Drop your video here"}
+                    <h3 className="text-lg font-bold font-mono uppercase tracking-widest mb-2 text-white transition-colors">
+                        {file ? "Change Video" : "Drag & Drop Video Here"}
                     </h3>
-                    <p className="text-neutral-500 text-sm">
-                        or click to browse from your device
+                    <p className="text-neutral-600 text-xs font-mono uppercase tracking-widest">
+                        or click to browse your files
                     </p>
                 </div>
 
                 {/* Selected File Details */}
                 {file && (
-                    <div className="mt-8 bg-neutral-950 border border-neutral-800 rounded-2xl p-4 flex items-center justify-between animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="mt-8 bg-black border border-neutral-800 p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="flex items-center space-x-4">
-                            <div className="bg-indigo-500/20 p-3 rounded-xl">
-                                <FileVideo className="w-6 h-6 text-indigo-400" />
+                            <div className="bg-sensor-charcoal p-3 border border-neutral-800">
+                                <FileVideo className="w-5 h-5 text-neutral-400" />
                             </div>
                             <div>
-                                <p className="font-medium text-neutral-200 truncate max-w-[200px] md:max-w-xs">{file.name}</p>
-                                <p className="text-xs text-neutral-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                                <p className="font-mono text-sm text-neutral-300 truncate max-w-[200px] md:max-w-xs uppercase">{file.name}</p>
+                                <p className="text-xs font-mono text-neutral-600 uppercase tracking-widest">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
                             </div>
                         </div>
 
@@ -155,48 +155,48 @@ export default function Studio() {
                                 <select
                                     value={taskType}
                                     onChange={(e) => setTaskType(e.target.value)}
-                                    className="bg-neutral-800 border border-neutral-700 text-neutral-200 text-sm rounded-xl px-3 py-2.5 outline-none hover:border-indigo-500/50 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium cursor-pointer"
+                                    className="bg-sensor-charcoal border border-neutral-700 text-white font-mono text-xs uppercase tracking-widest px-3 py-3 outline-none hover:border-neutral-500 focus:border-white transition-colors cursor-pointer"
                                 >
-                                    <option value="denoising">Denoise (Remove Grain)</option>
-                                    <option value="low_light">Low-Light Enhance</option>
+                                    <option value="denoising">Spatial Denoise</option>
+                                    <option value="low_light">Low-Light Enh</option>
                                 </select>
                             </div>
                         )}
 
                         {/* Status / Actions */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 w-full md:w-auto">
                             {!jobId ? (
                                 <button
                                     onClick={(e) => { e.stopPropagation(); startEnhancement(); }}
                                     disabled={uploading}
-                                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-medium transition-all hover:-translate-y-0.5 shadow-lg shadow-indigo-600/30 disabled:opacity-50 disabled:hover:translate-y-0"
+                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-titanium hover:bg-white text-black px-6 py-3 font-bold font-mono text-xs uppercase tracking-widest transition-colors tactile-btn disabled:opacity-50"
                                 >
-                                    {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Wand2 className="w-5 h-5" />}
-                                    {uploading ? "Uploading..." : "Enhance"}
+                                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                    {uploading ? "Uploading" : "Enhance Video"}
                                 </button>
                             ) : (
-                                <div className="flex items-center gap-3 pr-2">
+                                <div className="flex items-center gap-3 w-full md:w-auto">
                                     {jobStatus === "processing" && (
-                                        <span className="flex items-center gap-2 text-indigo-400 font-medium">
-                                            <Loader2 className="w-5 h-5 animate-spin" /> Processing
+                                        <span className="flex items-center gap-2 text-optic-amber font-mono font-bold text-xs uppercase tracking-widest">
+                                            <Loader2 className="w-4 h-4 animate-spin" /> Processing
                                         </span>
                                     )}
                                     {jobStatus === "completed" && (
-                                        <div className="flex items-center gap-2">
-                                            <span className="flex items-center gap-2 text-emerald-400 font-medium badge bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 mr-2">
-                                                <CheckCircle2 className="w-4 h-4" /> Ready
+                                        <div className="flex items-center gap-3 w-full md:w-auto">
+                                            <span className="flex items-center gap-2 text-neutral-300 font-mono font-bold text-xs uppercase tracking-widest px-2">
+                                                <span className="w-1.5 h-1.5 bg-white" /> Done
                                             </span>
                                             <a
                                                 href={`http://localhost:8000/api/v1/video/download/${jobId}`}
                                                 download
-                                                className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+                                                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-black border border-neutral-700 hover:border-white text-white px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-colors tactile-btn"
                                             >
                                                 <Download className="w-4 h-4" /> Download
                                             </a>
                                         </div>
                                     )}
                                     {jobStatus === "failed" && (
-                                        <span className="text-red-400 font-medium">Failed</span>
+                                        <span className="text-red-500 font-mono font-bold text-xs uppercase tracking-widest">Failed</span>
                                     )}
                                 </div>
                             )}
@@ -206,7 +206,7 @@ export default function Studio() {
 
                 {/* Error Message */}
                 {errorMSG && (
-                    <div className="mt-4 text-red-400 text-sm text-center bg-red-400/10 py-2 rounded-lg border border-red-400/20">
+                    <div className="mt-4 text-red-500 text-xs font-mono uppercase tracking-widest text-center bg-black border border-red-500/50 p-3">
                         {errorMSG}
                     </div>
                 )}
@@ -216,9 +216,9 @@ export default function Studio() {
             {/* Progress Footer placeholder */}
             {jobStatus === "processing" && (
                 <div className="mt-12 text-center animate-pulse">
-                    <p className="text-neutral-500 text-sm mb-2">Enhancing frames with Deep Learning model ({taskType})...</p>
-                    <div className="w-64 h-1.5 bg-neutral-800 rounded-full mx-auto overflow-hidden">
-                        <div className="h-full bg-indigo-500 w-1/3 animate-ping" style={{ animationDuration: "2s" }} />
+                    <p className="text-neutral-500 font-mono text-xs uppercase tracking-widest mb-3">Enhancing your video // {taskType.replace("_", " ")}</p>
+                    <div className="w-64 h-px bg-neutral-800 mx-auto overflow-hidden relative">
+                        <div className="absolute top-0 left-0 h-full bg-optic-amber w-1/3 animate-ping" style={{ animationDuration: "1.5s" }} />
                     </div>
                 </div>
             )}
