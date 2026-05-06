@@ -1,40 +1,98 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Camera, Aperture, SlidersHorizontal, ArrowRight, Video, ShieldCheck, Zap, CheckCircle2 } from "lucide-react";
 
 export default function LandingPage() {
+  const [sliderValue, setSliderValue] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMove = (clientX: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    const percentage = (x / rect.width) * 100;
+    setSliderValue(percentage);
+  };
+
+  useEffect(() => {
+    const handlePointerUp = () => setIsDragging(false);
+    window.addEventListener("pointerup", handlePointerUp);
+    return () => window.removeEventListener("pointerup", handlePointerUp);
+  }, []);
+
   return (
     <main className="min-h-screen bg-sensor-black text-titanium font-sans selection:bg-optic-amber/30 overflow-x-hidden noise-overlay relative">
 
-
-
-      {/* Hero Section */}
-      <section className="relative pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center z-10">
-        {/* Calibrated Grid Background */}
-        <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
-
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-neutral-800 text-neutral-400 text-sm font-mono mb-8 uppercase tracking-widest relative z-10 bg-black">
-          <span className="w-2 h-2 rounded-full bg-optic-amber animate-pulse" /> LumosMaximAI 2.0 is Live
-        </div>
+      <div 
+        ref={containerRef}
+        className="relative w-full border-b border-neutral-900 select-none touch-none"
+        onPointerMove={(e) => isDragging && handleMove(e.clientX)}
+      >
         
-        <h1 className="text-6xl md:text-8xl font-black tracking-tighter max-w-4xl text-titanium mb-8 leading-[1.1] relative z-10">
-          Bring dark footage <span className="text-white relative"><span className="absolute -left-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full"></span>to the light.</span>
-        </h1>
-        <p className="text-xl md:text-2xl text-neutral-500 max-w-2xl font-medium mb-12 relative z-10 font-mono text-sm uppercase tracking-wide">
-          Professional video denoising and extreme low-light enhancement. <br /> Powered by deep learning.
-        </p>
+        {/* Base Hero (Sharp & Enhanced) */}
+        <section className="relative pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center z-10 min-h-[70vh] justify-center pointer-events-auto">
+          {/* Calibrated Grid Background */}
+          <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
 
-        <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10">
-          <Link href="/studio" className="bg-titanium text-sensor-black px-8 py-4 text-sm font-bold uppercase tracking-widest flex items-center gap-2 tactile-btn border border-titanium hover:bg-white">
-            <Aperture className="w-5 h-5" /> Start Enhancing
-          </Link>
-          <Link href="#pricing" className="bg-black border border-neutral-800 hover:border-neutral-500 text-titanium px-8 py-4 text-sm font-mono uppercase tracking-widest flex items-center gap-2 tactile-btn transition-colors">
-            View Pricing
-          </Link>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-neutral-800 text-neutral-400 text-sm font-mono mb-8 uppercase tracking-widest relative z-10 bg-black">
+            <span className="w-2 h-2 rounded-full bg-optic-cyan animate-pulse" /> LumosMaximAI 2.0 is Live
+          </div>
+          
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter max-w-4xl text-titanium mb-8 leading-[1.1] relative z-10 pointer-events-none">
+            Bring dark footage <span className="text-white relative"><span className="absolute -left-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full"></span>to the light.</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-neutral-500 max-w-2xl font-medium mb-12 relative z-10 font-mono text-sm uppercase tracking-wide pointer-events-none">
+            Professional video denoising and extreme low-light enhancement. <br /> Powered by deep learning.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center gap-4 relative z-20">
+            <Link href="/studio" className="bg-titanium text-sensor-black px-8 py-4 text-sm font-bold uppercase tracking-widest flex items-center gap-2 tactile-btn border border-titanium hover:bg-white">
+              <Aperture className="w-5 h-5" /> Start Enhancing
+            </Link>
+            <Link href="#pricing" className="bg-black border border-neutral-800 hover:border-neutral-500 text-titanium px-8 py-4 text-sm font-mono uppercase tracking-widest flex items-center gap-2 tactile-btn transition-colors">
+              View Pricing
+            </Link>
+          </div>
+        </section>
+
+        {/* Blurry/Grainy Overlay (Unenhanced) */}
+        <div 
+          className="absolute inset-0 z-20 pointer-events-none"
+          style={{ clipPath: `inset(0 ${100 - sliderValue}% 0 0)` }}
+        >
+          {/* Blur & Darken */}
+          <div className="absolute inset-0 backdrop-blur-[12px] bg-black/50" />
+          
+          {/* Heavy Grain */}
+          <div 
+            className="absolute inset-0 opacity-80 mix-blend-screen" 
+            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%270 0 400 400%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27noiseFilter%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%273%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23noiseFilter)%27/%3E%3C/svg%3E")' }} 
+          />
         </div>
-      </section>
+
+        {/* Slider Visual Handle with expanded hit area */}
+        <div 
+          className="absolute top-0 bottom-0 z-30 pointer-events-auto cursor-ew-resize flex justify-center w-8 -ml-4"
+          style={{ left: `${sliderValue}%` }}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+        >
+          {/* The visible cyan line */}
+          <div className="w-1 h-full bg-optic-cyan shadow-[0_0_15px_rgba(6,182,212,0.8)]" />
+
+          {/* Logo container */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-black border border-optic-cyan rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.5)] overflow-hidden pointer-events-none">
+            <Image src="/logo.png" alt="Slider Handle" width={40} height={40} className="object-cover" />
+          </div>
+        </div>
+
+      </div>
 
       {/* Features Outline */}
       <section className="py-24 border-y border-neutral-900 relative bg-sensor-charcoal overflow-hidden z-10">
