@@ -4,12 +4,15 @@ import React, { useState, useCallback, useEffect } from "react";
 import axios from "axios";
 import { UploadCloud, FileVideo, Wand2, Loader2, CheckCircle2, Download, History, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { v4 as uuidv4 } from "uuid";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Studio() {
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
-    const [jobId, setJobId] = useState<number | null>(null);
+    const [jobId, setJobId] = useState<string | null>(null);
     const [jobStatus, setJobStatus] = useState<string | null>(null);
+    const [jobData, setJobData] = useState<any | null>(null);
     const [errorMSG, setErrorMSG] = useState<string | null>(null);
     const [taskType, setTaskType] = useState<string>("denoising");
 
@@ -20,6 +23,8 @@ export default function Studio() {
             setFile(droppedFile);
             setJobId(null);
             setJobStatus(null);
+            setJobData(null);
+            setErrorMSG(null);
         } else {
             setErrorMSG("Please select a valid video file.");
         }
@@ -31,6 +36,7 @@ export default function Studio() {
             setFile(selectedFile);
             setJobId(null);
             setJobStatus(null);
+            setJobData(null);
             setErrorMSG(null);
         } else {
             setErrorMSG("Please select a valid video file.");
@@ -43,18 +49,40 @@ export default function Studio() {
         setUploading(true);
         setErrorMSG(null);
 
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("task_type", taskType);
-
         try {
-            const response = await axios.post("http://localhost:8000/api/v1/video/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            // 1. Upload to Supabase Storage
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${uuidv4()}.${fileExt}`;
+            
+            const { error: uploadError } = await supabase.storage
+                .from('raw-videos')
+                .upload(fileName, file);
+
+            if (uploadError) {
+                throw new Error("Failed to upload to Supabase: " + uploadError.message);
+            }
+
+            // 2. Get Public URL
+            const { data: publicUrlData } = supabase.storage
+                .from('raw-videos')
+                .getPublicUrl(fileName);
+
+            const videoUrl = publicUrlData.publicUrl;
+
+            // 3. Trigger FastAPI Backend
+            const payload = {
+                video_url: videoUrl,
+                filename: file.name,
+                size_mb: file.size / (1024 * 1024)
+            };
+
+            const response = await axios.post("http://localhost:8000/api/v1/jobs/", payload);
+            
             setJobId(response.data.job_id);
             setJobStatus("processing");
-        } catch (err) {
-            setErrorMSG("Failed to upload the video. Ensure backend is running.");
+            
+        } catch (err: any) {
+            setErrorMSG(err.message || "Failed to process the video. Ensure backend is running.");
             console.error(err);
         } finally {
             setUploading(false);
@@ -67,8 +95,10 @@ export default function Studio() {
         if (jobId && jobStatus === "processing") {
             interval = setInterval(async () => {
                 try {
-                    const res = await axios.get(`http://localhost:8000/api/v1/video/status/${jobId}`);
+                    const res = await axios.get(`http://localhost:8000/api/v1/jobs/${jobId}`);
+                    setJobData(res.data);
                     setJobStatus(res.data.status);
+                    
                     if (res.data.status === "completed" || res.data.status === "failed") {
                         clearInterval(interval);
                     }
@@ -186,13 +216,16 @@ export default function Studio() {
                                             <span className="flex items-center gap-2 text-neutral-300 font-mono font-bold text-xs uppercase tracking-widest px-2">
                                                 <span className="w-1.5 h-1.5 bg-white" /> Done
                                             </span>
-                                            <a
-                                                href={`http://localhost:8000/api/v1/video/download/${jobId}`}
-                                                download
-                                                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-black border border-neutral-700 hover:border-white text-white px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-colors tactile-btn"
-                                            >
-                                                <Download className="w-4 h-4" /> Download
-                                            </a>
+                                            {jobData?.enhanced_url && (
+                                                <a
+                                                    href={jobData.enhanced_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-black border border-neutral-700 hover:border-white text-white px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-colors tactile-btn"
+                                                >
+                                                    <Download className="w-4 h-4" /> View/Download
+                                                </a>
+                                            )}
                                         </div>
                                     )}
                                     {jobStatus === "failed" && (
