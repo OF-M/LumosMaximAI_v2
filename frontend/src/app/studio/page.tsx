@@ -2,12 +2,14 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import axios from "axios";
-import { UploadCloud, FileVideo, Wand2, Loader2, CheckCircle2, Download, History, ArrowLeft } from "lucide-react";
+import { UploadCloud, FileVideo, Wand2, Loader2, Download, History, ArrowLeft, SplitSquareHorizontal } from "lucide-react";
 import Link from "next/link";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/lib/supabaseClient";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 export default function Studio() {
+    const { user, loading: authLoading } = useRequireAuth();
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
     const [jobId, setJobId] = useState<string | null>(null);
@@ -73,7 +75,8 @@ export default function Studio() {
             const payload = {
                 video_url: videoUrl,
                 filename: file.name,
-                size_mb: file.size / (1024 * 1024)
+                size_mb: file.size / (1024 * 1024),
+                task_type: taskType
             };
 
             const response = await axios.post("http://localhost:8000/api/v1/jobs/", payload);
@@ -92,13 +95,13 @@ export default function Studio() {
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
-        if (jobId && jobStatus === "processing") {
+        if (jobId && (jobStatus === "processing" || jobStatus === "pending")) {
             interval = setInterval(async () => {
                 try {
                     const res = await axios.get(`http://localhost:8000/api/v1/jobs/${jobId}`);
                     setJobData(res.data);
                     setJobStatus(res.data.status);
-                    
+
                     if (res.data.status === "completed" || res.data.status === "failed") {
                         clearInterval(interval);
                     }
@@ -113,6 +116,12 @@ export default function Studio() {
             if (interval) clearInterval(interval);
         };
     }, [jobId, jobStatus]);
+
+    if (authLoading || !user) return (
+        <div className="min-h-screen bg-sensor-black flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-neutral-500 animate-spin" />
+        </div>
+    );
 
     return (
         <main className="min-h-screen bg-sensor-black text-titanium flex flex-col items-center pt-32 pb-20 px-4 font-sans selection:bg-optic-amber/30 noise-overlay relative overflow-hidden">
@@ -206,7 +215,7 @@ export default function Studio() {
                                 </button>
                             ) : (
                                 <div className="flex items-center gap-3 w-full md:w-auto">
-                                    {jobStatus === "processing" && (
+                                    {(jobStatus === "processing" || jobStatus === "pending") && (
                                         <span className="flex items-center gap-2 text-optic-amber font-mono font-bold text-xs uppercase tracking-widest">
                                             <Loader2 className="w-4 h-4 animate-spin" /> Processing
                                         </span>
@@ -216,14 +225,20 @@ export default function Studio() {
                                             <span className="flex items-center gap-2 text-neutral-300 font-mono font-bold text-xs uppercase tracking-widest px-2">
                                                 <span className="w-1.5 h-1.5 bg-white" /> Done
                                             </span>
+                                            <Link
+                                                href={`/compare?jobId=${jobId}`}
+                                                className="flex items-center justify-center gap-2 bg-titanium hover:bg-white text-black px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-colors tactile-btn"
+                                            >
+                                                <SplitSquareHorizontal className="w-4 h-4" /> Compare
+                                            </Link>
                                             {jobData?.enhanced_url && (
                                                 <a
                                                     href={jobData.enhanced_url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-black border border-neutral-700 hover:border-white text-white px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-colors tactile-btn"
+                                                    className="flex items-center justify-center gap-2 bg-black border border-neutral-700 hover:border-white text-white px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-colors tactile-btn"
                                                 >
-                                                    <Download className="w-4 h-4" /> View/Download
+                                                    <Download className="w-4 h-4" /> Download
                                                 </a>
                                             )}
                                         </div>

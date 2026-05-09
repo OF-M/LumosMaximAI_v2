@@ -4,23 +4,52 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { ArrowLeft, Loader2, PlayCircle, Eye, Trash, History, Download, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 interface Job {
-    id: number;
+    id: string;
     status: string;
-    task_type: string;
+    task_type: string | null;
     created_at: string;
-    original_video_path: string | null;
-    processed_video_path: string | null;
+    enhanced_url: string | null;
+    error_log: string | null;
+    videos: {
+        filename: string | null;
+        original_url: string | null;
+    } | null;
 }
 
 export default function Dashboard() {
+    const { user, loading: authLoading } = useRequireAuth();
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    const downloadVideo = async (url: string, filename: string) => {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `enhanced_${filename}`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    };
+
+    const deleteJob = async (jobId: string) => {
+        setDeletingId(jobId);
+        try {
+            await axios.delete(`http://localhost:8000/api/v1/jobs/${jobId}`);
+            setJobs((prev) => prev.filter((j) => j.id !== jobId));
+        } catch (err) {
+            console.error("Failed to delete job:", err);
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     const fetchJobs = async () => {
         try {
-            const res = await axios.get("http://localhost:8000/api/v1/video/jobs");
+            const res = await axios.get("http://localhost:8000/api/v1/jobs/");
             setJobs(res.data);
         } catch (err) {
             console.error("Failed to fetch jobs:", err);
@@ -36,6 +65,12 @@ export default function Dashboard() {
         const intervalId = setInterval(fetchJobs, 5000);
         return () => clearInterval(intervalId);
     }, []);
+
+    if (authLoading || !user) return (
+        <div className="min-h-screen bg-sensor-black flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-neutral-500 animate-spin" />
+        </div>
+    );
 
     return (
         <main className="min-h-screen bg-sensor-black text-titanium flex flex-col pt-32 pb-16 px-4 md:px-10 font-sans noise-overlay relative overflow-hidden">
@@ -104,15 +139,15 @@ export default function Dashboard() {
                                 <div className="p-5 flex-grow flex flex-col">
                                     <div className="flex items-center justify-between mb-4">
                                         <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-black bg-white px-2 py-1">
-                                            {job.task_type.replace("_", " ")}
+                                            {(job.task_type ?? "unknown").replace("_", " ")}
                                         </span>
                                         <span className="text-[10px] font-mono text-neutral-600 uppercase tracking-wider">
                                             {new Date(job.created_at).toLocaleDateString()}
                                         </span>
                                     </div>
 
-                                    <h3 className="text-sm font-mono text-neutral-300 truncate mb-4" title={job.original_video_path || "Unknown video"}>
-                                        {job.original_video_path || "Unknown Source"}
+                                    <h3 className="text-sm font-mono text-neutral-300 truncate mb-4" title={job.videos?.filename || "Unknown video"}>
+                                        {job.videos?.filename || "Unknown Source"}
                                     </h3>
 
                                     <div className="mt-auto pt-4 border-t border-neutral-900 flex items-center justify-between">
@@ -139,16 +174,28 @@ export default function Dashboard() {
                                             )}
                                         </div>
 
-                                        {job.status === "completed" && (
-                                            <a
-                                                href={`http://localhost:8000/api/v1/video/download/${job.id}`}
-                                                download
-                                                className="text-neutral-500 hover:text-white transition-colors bg-black border border-neutral-800 hover:border-neutral-600 p-2"
-                                                title="Download Output"
+                                        <div className="flex items-center gap-2">
+                                            {job.status === "completed" && job.enhanced_url && (
+                                                <button
+                                                    onClick={() => downloadVideo(job.enhanced_url!, job.videos?.filename ?? "video.mp4")}
+                                                    className="text-neutral-500 hover:text-white transition-colors bg-black border border-neutral-800 hover:border-neutral-600 p-2"
+                                                    title="Download Output"
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => deleteJob(job.id)}
+                                                disabled={deletingId === job.id}
+                                                className="text-neutral-600 hover:text-red-500 transition-colors bg-black border border-neutral-800 hover:border-red-900 p-2 disabled:opacity-40"
+                                                title="Delete Job"
                                             >
-                                                <Download className="w-4 h-4" />
-                                            </a>
-                                        )}
+                                                {deletingId === job.id
+                                                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                                                    : <Trash className="w-4 h-4" />
+                                                }
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 

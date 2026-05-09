@@ -5,21 +5,42 @@ from app.core.config import settings
 supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 def get_job(job_id: str):
-    response = supabase.table("jobs").select("*").eq("id", job_id).execute()
+    response = supabase.table("jobs").select("*, videos(filename, original_url, size_mb)").eq("id", job_id).execute()
     if response.data:
         return response.data[0]
     return None
 
-def create_job(video_id: str, user_id: str):
+def create_video(filename: str, original_url: str, size_mb: float = None):
+    data = {
+        "filename": filename,
+        "original_url": original_url,
+        "size_mb": size_mb
+    }
+    response = supabase.table("videos").insert(data).execute()
+    if response.data:
+        return response.data[0]
+    return None
+
+def get_all_jobs():
+    response = supabase.table("jobs").select("*, videos(filename, original_url, size_mb)").order("created_at", desc=True).execute()
+    return response.data or []
+
+def create_job(video_id: str, user_id: str = None, task_type: str = "denoising"):
     data = {
         "video_id": video_id,
-        "user_id": user_id,
-        "status": "pending"
+        "status": "pending",
+        "task_type": task_type,
     }
+    if user_id:
+        data["user_id"] = user_id
     response = supabase.table("jobs").insert(data).execute()
     if response.data:
         return response.data[0]
     return None
+
+def delete_job(job_id: str):
+    response = supabase.table("jobs").delete().eq("id", job_id).execute()
+    return bool(response.data)
 
 def update_job_status(job_id: str, status: str, enhanced_url: str = None, metrics: dict = None, error: str = None):
     data = {"status": status}

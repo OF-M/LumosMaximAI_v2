@@ -5,6 +5,7 @@ class JobCreate(BaseModel):
     video_url: str
     filename: str
     size_mb: Optional[float] = None
+    task_type: str = "denoising"
 
 class JobResponse(BaseModel):
     job_id: str

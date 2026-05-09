@@ -1,8 +1,20 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { History } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { History, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Navbar() {
+  const { user, loading, signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
+
   return (
     <nav className="fixed top-0 w-full z-50 bg-neutral-950/80 backdrop-blur-lg border-b border-neutral-800">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -12,15 +24,33 @@ export function Navbar() {
         </Link>
         <div className="flex items-center gap-6">
           <Link href="/#pricing" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors hidden md:block">Pricing</Link>
-          <Link href="/dashboard" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors flex items-center gap-1.5">
-            <History className="w-4 h-4" /> Dashboard
-          </Link>
-          <Link href="/login" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
-            Log In
-          </Link>
-          <Link href="/studio" className="bg-white hover:bg-neutral-200 text-neutral-950 px-5 py-2.5 rounded-xl text-sm font-semibold transition-transform hover:-translate-y-0.5">
-            Enhance Video
-          </Link>
+
+          {!loading && user ? (
+            <>
+              <Link href="/dashboard" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors flex items-center gap-1.5">
+                <History className="w-4 h-4" /> Dashboard
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-1.5 text-sm font-medium text-neutral-400 hover:text-white transition-colors"
+              >
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
+              <Link href="/studio" className="bg-white hover:bg-neutral-200 text-neutral-950 px-5 py-2.5 rounded-xl text-sm font-semibold transition-transform hover:-translate-y-0.5">
+                Enhance Video
+              </Link>
+              <span className="text-xs font-mono text-neutral-500 hidden md:block truncate max-w-[160px]">{user.email}</span>
+            </>
+          ) : !loading ? (
+            <>
+              <Link href="/login" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors">
+                Log In
+              </Link>
+              <Link href="/register" className="bg-white hover:bg-neutral-200 text-neutral-950 px-5 py-2.5 rounded-xl text-sm font-semibold transition-transform hover:-translate-y-0.5">
+                Get Started
+              </Link>
+            </>
+          ) : null}
         </div>
       </div>
     </nav>

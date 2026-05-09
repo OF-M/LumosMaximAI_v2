@@ -2,32 +2,65 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Aperture, Mail, Lock, ArrowRight, User, Github } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Mail, Lock, ArrowRight, User } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual registration logic
-    console.log("Registration attempt:", { name, email, password });
+    setError(null);
+    setLoading(true);
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: name },
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else if (data.session) {
+      router.push("/studio");
+    } else {
+      // Supabase email confirmation is enabled — redirect to login
+      router.push("/login?registered=1");
+    }
   };
 
   return (
     <main className="min-h-screen bg-sensor-black text-titanium flex flex-col items-center justify-center pt-32 pb-12 px-6 relative overflow-hidden font-sans noise-overlay">
-      
+
       {/* Background Grid */}
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
-
-
 
       {/* Register Card */}
       <div className="w-full max-w-md bg-sensor-charcoal border border-neutral-900 p-8 shadow-2xl relative z-10">
         <div className="text-center mb-8 border-b border-neutral-900 pb-6">
           <h1 className="text-2xl font-bold text-white uppercase tracking-tight">Create an Account</h1>
         </div>
+
+        {error && (
+          <div className="mb-5 px-4 py-3 bg-red-950/50 border border-red-800 text-red-400 text-xs font-mono uppercase tracking-wide">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1.5">
@@ -81,20 +114,12 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full bg-titanium hover:bg-white text-black font-bold font-mono text-sm uppercase tracking-widest py-3.5 transition-colors tactile-btn flex items-center justify-center gap-2 mt-4"
+            disabled={loading}
+            className="w-full bg-titanium hover:bg-white text-black font-bold font-mono text-sm uppercase tracking-widest py-3.5 transition-colors tactile-btn flex items-center justify-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign Up <ArrowRight className="w-4 h-4" />
+            {loading ? "Creating Account..." : <><span>Sign Up</span> <ArrowRight className="w-4 h-4" /></>}
           </button>
         </form>
-
-        <div className="mt-6 flex gap-3">
-          <button className="flex-1 bg-black border border-neutral-800 hover:border-neutral-500 text-neutral-400 hover:text-white py-2.5 flex items-center justify-center gap-2 transition-colors font-mono text-xs uppercase tactile-btn">
-            <Github className="w-4 h-4" /> Github
-          </button>
-          <button className="flex-1 bg-black border border-neutral-800 hover:border-neutral-500 text-neutral-400 hover:text-white py-2.5 flex items-center justify-center gap-2 transition-colors font-mono text-xs uppercase tactile-btn">
-            Google
-          </button>
-        </div>
 
         <p className="mt-8 text-center text-xs font-mono text-neutral-600 uppercase">
           Already have an account?{" "}

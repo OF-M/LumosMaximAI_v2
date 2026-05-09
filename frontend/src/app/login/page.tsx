@@ -2,31 +2,49 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Aperture, Mail, Lock, ArrowRight, Github } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Mail, Lock, ArrowRight, Github } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual login logic
-    console.log("Login attempt:", { email, password });
+    setError(null);
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      router.push("/studio");
+    }
   };
 
   return (
     <main className="min-h-screen bg-sensor-black text-titanium flex flex-col items-center justify-center pt-32 pb-12 px-6 relative overflow-hidden font-sans noise-overlay">
-      
+
       {/* Background Grid */}
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
-
-
 
       {/* Login Card */}
       <div className="w-full max-w-md bg-sensor-charcoal border border-neutral-900 p-8 shadow-2xl relative z-10">
         <div className="text-center mb-8 border-b border-neutral-900 pb-6">
           <h1 className="text-2xl font-bold text-white uppercase tracking-tight">Welcome Back</h1>
         </div>
+
+        {error && (
+          <div className="mb-5 px-4 py-3 bg-red-950/50 border border-red-800 text-red-400 text-xs font-mono uppercase tracking-wide">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1.5">
@@ -48,7 +66,6 @@ export default function LoginPage() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-mono text-neutral-500 uppercase tracking-widest" htmlFor="password">Password</label>
-              <Link href="#" className="text-xs text-neutral-500 hover:text-white font-mono uppercase transition-colors">Reset</Link>
             </div>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600" />
@@ -66,23 +83,15 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-titanium hover:bg-white text-black font-bold font-mono text-sm uppercase tracking-widest py-3.5 transition-colors tactile-btn flex items-center justify-center gap-2 mt-4"
+            disabled={loading}
+            className="w-full bg-titanium hover:bg-white text-black font-bold font-mono text-sm uppercase tracking-widest py-3.5 transition-colors tactile-btn flex items-center justify-center gap-2 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign In <ArrowRight className="w-4 h-4" />
+            {loading ? "Signing In..." : <><span>Sign In</span> <ArrowRight className="w-4 h-4" /></>}
           </button>
         </form>
 
-        <div className="mt-6 flex gap-3">
-          <button className="flex-1 bg-black border border-neutral-800 hover:border-neutral-500 text-neutral-400 hover:text-white py-2.5 flex items-center justify-center gap-2 transition-colors font-mono text-xs uppercase tactile-btn">
-            <Github className="w-4 h-4" /> Github
-          </button>
-          <button className="flex-1 bg-black border border-neutral-800 hover:border-neutral-500 text-neutral-400 hover:text-white py-2.5 flex items-center justify-center gap-2 transition-colors font-mono text-xs uppercase tactile-btn">
-            Google
-          </button>
-        </div>
-
         <p className="mt-8 text-center text-xs font-mono text-neutral-600 uppercase">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/register" className="text-neutral-400 hover:text-white transition-colors border-b border-transparent hover:border-white">
             Sign up
           </Link>

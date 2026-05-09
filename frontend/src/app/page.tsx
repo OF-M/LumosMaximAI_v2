@@ -4,8 +4,11 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Camera, Aperture, SlidersHorizontal, ArrowRight, Video, ShieldCheck, Zap, CheckCircle2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LandingPage() {
+  const { user } = useAuth();
+  const pricingHref = user ? "/studio" : "/register";
   const [sliderValue, setSliderValue] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -165,7 +168,7 @@ export default function LandingPage() {
               </li>
             </ul>
 
-            <Link href="/register" className="w-full text-center border border-neutral-800 hover:border-white text-neutral-400 hover:text-white font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
+            <Link href={pricingHref} className="w-full text-center border border-neutral-800 hover:border-white text-neutral-400 hover:text-white font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
               Get Started
             </Link>
           </div>
@@ -201,7 +204,7 @@ export default function LandingPage() {
               </li>
             </ul>
 
-            <Link href="/register" className="w-full text-center bg-optic-amber hover:bg-white text-black font-bold font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
+            <Link href={pricingHref} className="w-full text-center bg-optic-amber hover:bg-white text-black font-bold font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
               Start Trial
             </Link>
           </div>
@@ -234,7 +237,7 @@ export default function LandingPage() {
               </li>
             </ul>
 
-            <Link href="/register" className="w-full text-center border border-neutral-800 hover:border-white text-neutral-400 hover:text-white font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
+            <Link href={pricingHref} className="w-full text-center border border-neutral-800 hover:border-white text-neutral-400 hover:text-white font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
               Go Max
             </Link>
           </div>

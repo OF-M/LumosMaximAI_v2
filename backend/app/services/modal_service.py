@@ -1,19 +1,18 @@
 import modal
-from app.core.config import settings
 
-def trigger_enhancement_job(job_id: str, video_url: str):
+def trigger_enhancement_job(job_id: str, video_url: str, task_type: str = "denoising"):
     """
     Triggers the Serverless GPU worker on Modal.com asynchronously.
     """
     try:
-        # Lookup the deployed function
-        f = modal.Function.lookup("lumos-maxim-ai-worker", "process_video")
-        
+        # Use the new modal Cls/Function API
+        process_video = modal.Function.from_name("lumos-maxim-ai-worker", "process_video")
+
         # .spawn() runs the function in the background and returns immediately
-        f.spawn(
-            job_id=job_id, 
-            video_url=video_url, 
-            callback_url=f"{settings.BACKEND_URL}{settings.API_V1_STR}/webhooks/modal-callback"
+        process_video.spawn(
+            job_id=job_id,
+            video_url=video_url,
+            task_type=task_type,
         )
         return True
     except Exception as e:
