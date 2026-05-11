@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { ArrowLeft, Loader2, PlayCircle, Eye, Trash, History, Download, AlertCircle } from "lucide-react";
+import { ArrowLeft, Loader2, PlayCircle, Eye, Trash, History, Download, AlertCircle, MessageSquare, Check, X } from "lucide-react";
 import Link from "next/link";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 
@@ -25,6 +25,39 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
+    const [notes, setNotes] = useState<Record<string, string>>({});
+    const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+    const [draftNote, setDraftNote] = useState("");
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem("lumos_job_notes");
+            if (stored) setNotes(JSON.parse(stored));
+        } catch {}
+    }, []);
+
+    const startEdit = (jobId: string) => {
+        setEditingNoteId(jobId);
+        setDraftNote(notes[jobId] ?? "");
+    };
+
+    const cancelEdit = () => {
+        setEditingNoteId(null);
+        setDraftNote("");
+    };
+
+    const saveNote = (jobId: string) => {
+        const updated = { ...notes };
+        if (draftNote.trim()) {
+            updated[jobId] = draftNote.trim();
+        } else {
+            delete updated[jobId];
+        }
+        setNotes(updated);
+        try { localStorage.setItem("lumos_job_notes", JSON.stringify(updated)); } catch {}
+        setEditingNoteId(null);
+    };
+
     const downloadVideo = async (url: string, filename: string) => {
         const res = await fetch(url);
         const blob = await res.blob();
@@ -40,6 +73,10 @@ export default function Dashboard() {
         try {
             await axios.delete(`http://localhost:8000/api/v1/jobs/${jobId}`);
             setJobs((prev) => prev.filter((j) => j.id !== jobId));
+            const updated = { ...notes };
+            delete updated[jobId];
+            setNotes(updated);
+            try { localStorage.setItem("lumos_job_notes", JSON.stringify(updated)); } catch {}
         } catch (err) {
             console.error("Failed to delete job:", err);
         } finally {
@@ -60,8 +97,6 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetchJobs();
-
-        // Auto-refresh jobs every 5 seconds nicely
         const intervalId = setInterval(fetchJobs, 5000);
         return () => clearInterval(intervalId);
     }, []);
@@ -117,8 +152,7 @@ export default function Dashboard() {
                                 key={job.id}
                                 className="bg-sensor-charcoal border border-neutral-900 hover:border-neutral-700 transition-colors flex flex-col group relative overflow-hidden"
                             >
-
-                                {/* Simulated Thumbnail Area */}
+                                {/* Thumbnail Area */}
                                 <div className="h-40 bg-black relative flex items-center justify-center overflow-hidden border-b border-neutral-900">
                                     <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
 
@@ -150,6 +184,42 @@ export default function Dashboard() {
                                         {job.videos?.filename || "Unknown Source"}
                                     </h3>
 
+                                    {/* Note area */}
+                                    {editingNoteId === job.id ? (
+                                        <div className="mb-4">
+                                            <textarea
+                                                value={draftNote}
+                                                onChange={(e) => setDraftNote(e.target.value)}
+                                                placeholder="Add a note..."
+                                                rows={3}
+                                                autoFocus
+                                                className="w-full bg-black border border-neutral-700 focus:border-neutral-400 text-neutral-300 font-mono text-xs p-2.5 resize-none outline-none placeholder-neutral-700 transition-colors leading-relaxed"
+                                            />
+                                            <div className="flex gap-2 mt-2">
+                                                <button
+                                                    onClick={() => saveNote(job.id)}
+                                                    className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest bg-white text-black px-3 py-1.5 hover:bg-neutral-200 transition-colors"
+                                                >
+                                                    <Check className="w-3 h-3" /> Save
+                                                </button>
+                                                <button
+                                                    onClick={cancelEdit}
+                                                    className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest bg-black border border-neutral-700 text-neutral-400 px-3 py-1.5 hover:border-neutral-500 transition-colors"
+                                                >
+                                                    <X className="w-3 h-3" /> Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : notes[job.id] ? (
+                                        <div className="mb-4 bg-black border border-neutral-800 p-3 flex gap-2.5 cursor-pointer hover:border-neutral-600 transition-colors" onClick={() => startEdit(job.id)}>
+                                            <MessageSquare className="w-3.5 h-3.5 text-neutral-600 shrink-0 mt-0.5" />
+                                            <p className="text-[11px] font-mono text-neutral-400 leading-relaxed line-clamp-3">
+                                                {notes[job.id]}
+                                            </p>
+                                        </div>
+                                    ) : null}
+
+                                    {/* Footer */}
                                     <div className="mt-auto pt-4 border-t border-neutral-900 flex items-center justify-between">
                                         <div>
                                             {job.status === "processing" && (
@@ -175,6 +245,19 @@ export default function Dashboard() {
                                         </div>
 
                                         <div className="flex items-center gap-2">
+                                            {/* Note button */}
+                                            <button
+                                                onClick={() => startEdit(job.id)}
+                                                className={`transition-colors bg-black border p-2 ${
+                                                    notes[job.id]
+                                                        ? "text-white border-neutral-600 hover:border-neutral-400"
+                                                        : "text-neutral-500 border-neutral-800 hover:text-white hover:border-neutral-600"
+                                                }`}
+                                                title={notes[job.id] ? "Edit Note" : "Add Note"}
+                                            >
+                                                <MessageSquare className="w-4 h-4" />
+                                            </button>
+
                                             {job.status === "completed" && job.enhanced_url && (
                                                 <button
                                                     onClick={() => downloadVideo(job.enhanced_url!, job.videos?.filename ?? "video.mp4")}

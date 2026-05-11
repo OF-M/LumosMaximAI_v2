@@ -4,8 +4,6 @@ import React, { useState, useCallback, useEffect } from "react";
 import axios from "axios";
 import { UploadCloud, FileVideo, Wand2, Loader2, Download, History, ArrowLeft, SplitSquareHorizontal } from "lucide-react";
 import Link from "next/link";
-import { v4 as uuidv4 } from "uuid";
-import { supabase } from "@/lib/supabaseClient";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 export default function Studio() {
@@ -52,40 +50,21 @@ export default function Studio() {
         setErrorMSG(null);
 
         try {
-            // 1. Upload to Supabase Storage
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${uuidv4()}.${fileExt}`;
-            
-            const { error: uploadError } = await supabase.storage
-                .from('raw-videos')
-                .upload(fileName, file);
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("task_type", taskType);
 
-            if (uploadError) {
-                throw new Error("Failed to upload to Supabase: " + uploadError.message);
-            }
+            const response = await axios.post(
+                "http://localhost:8000/api/v1/jobs/upload",
+                formData,
+                { headers: { "Content-Type": "multipart/form-data" } }
+            );
 
-            // 2. Get Public URL
-            const { data: publicUrlData } = supabase.storage
-                .from('raw-videos')
-                .getPublicUrl(fileName);
-
-            const videoUrl = publicUrlData.publicUrl;
-
-            // 3. Trigger FastAPI Backend
-            const payload = {
-                video_url: videoUrl,
-                filename: file.name,
-                size_mb: file.size / (1024 * 1024),
-                task_type: taskType
-            };
-
-            const response = await axios.post("http://localhost:8000/api/v1/jobs/", payload);
-            
             setJobId(response.data.job_id);
             setJobStatus("processing");
-            
         } catch (err: any) {
-            setErrorMSG(err.message || "Failed to process the video. Ensure backend is running.");
+            const detail = err.response?.data?.detail || err.message || "Failed to process the video. Ensure backend is running.";
+            setErrorMSG(detail);
             console.error(err);
         } finally {
             setUploading(false);
@@ -198,6 +177,7 @@ export default function Studio() {
                                 >
                                     <option value="denoising">Spatial Denoise</option>
                                     <option value="low_light">Low-Light Enh</option>
+                                    <option value="enhance">Full Enhance</option>
                                 </select>
                             </div>
                         )}

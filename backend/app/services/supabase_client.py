@@ -4,6 +4,19 @@ from app.core.config import settings
 # Initialize Supabase client
 supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
+BUCKET = "raw-videos"
+
+def upload_to_storage(path: str, data: bytes, content_type: str = "video/mp4"):
+    try:
+        supabase.storage.from_(BUCKET).upload(path, data, {"content-type": content_type})
+        return True
+    except Exception as e:
+        print(f"Storage upload error: {e}")
+        return False
+
+def get_public_url(path: str) -> str:
+    return supabase.storage.from_(BUCKET).get_public_url(path)
+
 def get_job(job_id: str):
     response = supabase.table("jobs").select("*, videos(filename, original_url, size_mb)").eq("id", job_id).execute()
     if response.data:
