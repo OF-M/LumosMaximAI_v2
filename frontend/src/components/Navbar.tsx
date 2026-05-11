@@ -23,7 +23,7 @@ export function Navbar() {
           <span className="text-xl font-bold tracking-tight text-white">LumosMaximAI</span>
         </Link>
         <div className="flex items-center gap-6">
-          <Link href="/#pricing" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors hidden md:block">Pricing</Link>
+          <Link href="/#pricing" className="text-sm font-medium text-neutral-400 hover:text-white transition-colors hidden md:block">Plans</Link>
 
           {!loading && user ? (
             <>
@@ -37,7 +37,7 @@ export function Navbar() {
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
               <Link href="/studio" className="bg-white hover:bg-neutral-200 text-neutral-950 px-5 py-2.5 rounded-xl text-sm font-semibold transition-transform hover:-translate-y-0.5">
-                Enhance Video
+                Enhance Footage
               </Link>
               <span className="text-xs font-mono text-neutral-500 hidden md:block truncate max-w-[160px]">{user.email}</span>
             </>
@@ -47,7 +47,7 @@ export function Navbar() {
                 Log In
               </Link>
               <Link href="/register" className="bg-white hover:bg-neutral-200 text-neutral-950 px-5 py-2.5 rounded-xl text-sm font-semibold transition-transform hover:-translate-y-0.5">
-                Get Started
+                Start Enhancing
               </Link>
             </>
           ) : null}

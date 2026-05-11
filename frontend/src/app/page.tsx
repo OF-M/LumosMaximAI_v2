@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Camera, Aperture, SlidersHorizontal, ArrowRight, Video, ShieldCheck, Zap, CheckCircle2 } from "lucide-react";
+import { Camera, Aperture, SlidersHorizontal, ArrowRight, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function LandingPage() {
@@ -42,14 +42,14 @@ export default function LandingPage() {
           <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
 
           <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-neutral-800 text-neutral-400 text-sm font-mono mb-8 uppercase tracking-widest relative z-10 bg-black">
-            <span className="w-2 h-2 rounded-full bg-optic-cyan animate-pulse" /> LumosMaximAI 2.0 is Live
+            <span className="w-2 h-2 rounded-full bg-optic-cyan animate-pulse" /> Low-Light Enhancement & Denoising
           </div>
-          
+
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter max-w-4xl text-titanium mb-8 leading-[1.1] relative z-10 pointer-events-none">
             Bring dark footage <span className="text-white relative"><span className="absolute -left-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full"></span>to the light.</span>
           </h1>
           <p className="text-xl md:text-2xl text-neutral-500 max-w-2xl font-medium mb-12 relative z-10 font-mono text-sm uppercase tracking-wide pointer-events-none">
-            Professional video denoising and extreme low-light enhancement. <br /> Powered by deep learning.
+            AI-powered low-light enhancement and spatial denoising for dark, grainy footage. <br /> Upload a clip. Get a clean result.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 relative z-20">
@@ -57,7 +57,7 @@ export default function LandingPage() {
               <Aperture className="w-5 h-5" /> Start Enhancing
             </Link>
             <Link href="#pricing" className="bg-black border border-neutral-800 hover:border-neutral-500 text-titanium px-8 py-4 text-sm font-mono uppercase tracking-widest flex items-center gap-2 tactile-btn transition-colors">
-              View Pricing
+              View Plans
             </Link>
           </div>
         </section>
@@ -89,8 +89,8 @@ export default function LandingPage() {
           {/* The visible cyan line */}
           <div className="w-1 h-full bg-optic-cyan shadow-[0_0_15px_rgba(6,182,212,0.8)]" />
 
-          {/* Logo container */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-black border border-optic-cyan rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.5)] overflow-hidden pointer-events-none">
+          {/* Logo container — offset by half the navbar height (40px) so it centers in the visible area below the fixed navbar */}
+          <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-black border border-optic-cyan rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.5)] overflow-hidden pointer-events-none" style={{ top: "calc(50% + 40px)" }}>
             <Image src="/logo.png" alt="Slider Handle" width={40} height={40} className="object-cover" />
           </div>
         </div>
@@ -106,8 +106,8 @@ export default function LandingPage() {
             <div className="w-12 h-12 bg-black border border-neutral-800 flex items-center justify-center">
               <Camera className="w-5 h-5 text-optic-amber" />
             </div>
-            <h3 className="text-2xl font-bold text-titanium">Zero-DCE Enhancement</h3>
-            <p className="text-neutral-500 leading-relaxed font-mono text-sm">Illuminate impossibly dark surveillance footage without amplifying noise or introducing artifacting.</p>
+            <h3 className="text-2xl font-bold text-titanium">Low-Light Enhancement</h3>
+            <p className="text-neutral-500 leading-relaxed font-mono text-sm">Recover detail from dark, underexposed footage using a Zero-DCE-based neural network trained on low-light video pairs.</p>
           </div>
 
           <div className="md:col-span-4 space-y-6 border-r border-neutral-900 px-4">
@@ -116,16 +116,16 @@ export default function LandingPage() {
               <SlidersHorizontal className="w-5 h-5 text-optic-cyan" />
             </div>
             <h3 className="text-2xl font-bold text-titanium">Spatial Denoising</h3>
-            <p className="text-neutral-500 leading-relaxed font-mono text-sm">Remove heavy ISO grain from night shots securely using targeted spatial neural networks.</p>
+            <p className="text-neutral-500 leading-relaxed font-mono text-sm">Strip ISO grain and sensor noise from night footage frame-by-frame using targeted spatial neural networks — without softening detail.</p>
           </div>
 
           <div className="md:col-span-4 space-y-6 pl-4">
             <div className="text-xs font-mono text-neutral-600 uppercase tracking-widest mb-12">Feature // 03</div>
             <div className="w-12 h-12 bg-black border border-neutral-800 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-neutral-400" />
+              <Zap className="w-5 h-5 text-neutral-400" />
             </div>
-            <h3 className="text-2xl font-bold text-titanium">Encrypted Pipeline</h3>
-            <p className="text-neutral-500 leading-relaxed font-mono text-sm">Your files never leave your encrypted project folder, keeping everything secure and private.</p>
+            <h3 className="text-2xl font-bold text-titanium">Cloud GPU Processing</h3>
+            <p className="text-neutral-500 leading-relaxed font-mono text-sm">Jobs run on cloud GPUs via Modal. Upload your clip, track progress in the dashboard, and download the enhanced result when it's ready.</p>
           </div>
           
         </div>
@@ -138,7 +138,7 @@ export default function LandingPage() {
         <div className="mb-20 relative z-10 border-b border-neutral-900 pb-8 flex justify-between items-end">
           <div>
             <h2 className="text-4xl md:text-5xl font-black text-titanium mb-2 tracking-tighter uppercase">Simple Pricing</h2>
-            <p className="text-sm font-mono text-neutral-500 uppercase tracking-widest">Choose the perfect tier for your workflow</p>
+            <p className="text-sm font-mono text-neutral-500 uppercase tracking-widest">Choose a plan that fits your volume</p>
           </div>
         </div>
 
@@ -151,7 +151,7 @@ export default function LandingPage() {
               <span className="text-4xl text-white">£0</span>
               <span className="text-neutral-600 text-sm">/mo</span>
             </div>
-            <p className="text-neutral-500 text-xs font-mono mb-10 leading-relaxed uppercase">Perfect for testing the AI on single clips.</p>
+            <p className="text-neutral-500 text-xs font-mono mb-10 leading-relaxed uppercase">Try low-light enhancement and denoising on a few clips.</p>
 
             <ul className="space-y-4 mb-12 flex-grow border-t border-neutral-900 pt-8">
               <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
@@ -160,11 +160,11 @@ export default function LandingPage() {
               </li>
               <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
                 <span className="w-1.5 h-1.5 bg-neutral-600" />
-                <span>Max Output: 1080p</span>
+                <span>Low-light & denoising</span>
               </li>
               <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
                 <span className="w-1.5 h-1.5 bg-neutral-600" />
-                <span>Standard Priority</span>
+                <span>Standard Queue</span>
               </li>
             </ul>
 
@@ -183,7 +183,7 @@ export default function LandingPage() {
               <span className="text-4xl text-white">£20</span>
               <span className="text-neutral-600 text-sm">/mo</span>
             </div>
-            <p className="text-neutral-400 text-xs font-mono mb-10 leading-relaxed uppercase">For creators needing reliable enhancement.</p>
+            <p className="text-neutral-400 text-xs font-mono mb-10 leading-relaxed uppercase">For creators processing dark footage regularly.</p>
 
             <ul className="space-y-4 mb-12 flex-grow border-t border-neutral-800 pt-8">
               <li className="flex items-center gap-3 text-white text-sm font-mono">
@@ -192,11 +192,11 @@ export default function LandingPage() {
               </li>
               <li className="flex items-center gap-3 text-white text-sm font-mono">
                 <span className="w-1.5 h-1.5 bg-optic-amber" />
-                <span>Max Output: 4K UHD</span>
+                <span>Low-light, denoise & full enhance</span>
               </li>
               <li className="flex items-center gap-3 text-white text-sm font-mono">
                 <span className="w-1.5 h-1.5 bg-optic-amber" />
-                <span>High Priority Processing</span>
+                <span>Priority Queue</span>
               </li>
               <li className="flex items-center gap-3 text-white text-sm font-mono">
                 <span className="w-1.5 h-1.5 bg-optic-amber" />
@@ -216,24 +216,24 @@ export default function LandingPage() {
               <span className="text-4xl text-white">£100</span>
               <span className="text-neutral-600 text-sm">/mo</span>
             </div>
-            <p className="text-neutral-500 text-xs font-mono mb-10 leading-relaxed uppercase">Commercial labs needing limitless access.</p>
+            <p className="text-neutral-500 text-xs font-mono mb-10 leading-relaxed uppercase">For studios running enhancement at scale.</p>
 
             <ul className="space-y-4 mb-12 flex-grow border-t border-neutral-900 pt-8">
               <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
                 <span className="w-1.5 h-1.5 bg-neutral-600" />
-                <span>Unlimited Processing</span>
+                <span>Unlimited Enhancements</span>
               </li>
               <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
                 <span className="w-1.5 h-1.5 bg-neutral-600" />
-                <span>Max Output: 8K</span>
+                <span>All enhancement modes</span>
               </li>
               <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
                 <span className="w-1.5 h-1.5 bg-neutral-600" />
-                <span>Instant Priority</span>
+                <span>Instant Queue</span>
               </li>
               <li className="flex items-center gap-3 text-neutral-400 text-sm font-mono">
                 <span className="w-1.5 h-1.5 bg-neutral-600" />
-                <span>Custom Model Access</span>
+                <span>Priority Support</span>
               </li>
             </ul>
 

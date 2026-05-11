@@ -106,7 +106,7 @@ export default function Compare() {
     const originalUrl = job.videos?.original_url ?? "";
     const enhancedUrl = job.enhanced_url ?? "";
     const filename = job.videos?.filename ?? "video";
-    const taskLabel = (job.task_type ?? "unknown").replace("_", " ");
+    const taskLabel = job.task_type === "enhance" ? "Low-Light Enhancement" : job.task_type === "denoising" ? "Spatial Denoising" : job.task_type ?? "unknown";
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
     return (

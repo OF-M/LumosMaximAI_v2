@@ -119,7 +119,7 @@ export default function Dashboard() {
                         <History className="text-neutral-500 w-8 h-8" />
                         My Dashboard
                     </h1>
-                    <p className="text-neutral-500 font-mono text-sm mt-2 uppercase tracking-wide">Manage all your AI-enhanced videos.</p>
+                    <p className="text-neutral-500 font-mono text-sm mt-2 uppercase tracking-wide">Your low-light enhancement and denoising jobs.</p>
                 </div>
 
                 <Link
@@ -139,8 +139,8 @@ export default function Dashboard() {
                 ) : jobs.length === 0 ? (
                     <div className="flex flex-col justify-center items-center h-64 border border-neutral-900 bg-sensor-charcoal text-center p-6">
                         <AlertCircle className="w-10 h-10 text-neutral-600 mb-4" />
-                        <h3 className="text-lg font-mono font-bold text-white uppercase tracking-widest mb-2">No videos yet</h3>
-                        <p className="text-neutral-500 font-mono text-xs uppercase max-w-sm mb-6">You haven't enhanced any videos yet.</p>
+                        <h3 className="text-lg font-mono font-bold text-white uppercase tracking-widest mb-2">No jobs yet</h3>
+                        <p className="text-neutral-500 font-mono text-xs uppercase max-w-sm mb-6">Upload dark or grainy footage in the studio to run your first enhancement.</p>
                         <Link href="/studio" className="bg-black border border-neutral-800 hover:border-neutral-500 text-white px-6 py-3 font-mono text-xs uppercase tracking-widest transition-colors tactile-btn">
                             New Enhancement
                         </Link>
@@ -173,7 +173,7 @@ export default function Dashboard() {
                                 <div className="p-5 flex-grow flex flex-col">
                                     <div className="flex items-center justify-between mb-4">
                                         <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-black bg-white px-2 py-1">
-                                            {(job.task_type ?? "unknown").replace("_", " ")}
+                                            {job.task_type === "enhance" ? "Low-Light Enhancement" : job.task_type === "denoising" ? "Spatial Denoising" : job.task_type ?? "unknown"}
                                         </span>
                                         <span className="text-[10px] font-mono text-neutral-600 uppercase tracking-wider">
                                             {new Date(job.created_at).toLocaleDateString()}

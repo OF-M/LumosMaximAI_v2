@@ -123,7 +123,7 @@ export default function Studio() {
                     Enhancement Studio
                 </h1>
                 <p className="text-sm md:text-base text-neutral-500 font-mono uppercase tracking-wide">
-                    Upload your video to begin enhancing.
+                    Upload dark or grainy footage — choose low-light enhancement, denoising, or both.
                 </p>
             </header>
 
@@ -147,7 +147,7 @@ export default function Studio() {
                         <UploadCloud className="w-6 h-6 text-neutral-500 group-hover:text-white" />
                     </div>
                     <h3 className="text-lg font-bold font-mono uppercase tracking-widest mb-2 text-white transition-colors">
-                        {file ? "Change Video" : "Drag & Drop Video Here"}
+                        {file ? "Change Video" : "Drag & Drop Your Footage Here"}
                     </h3>
                     <p className="text-neutral-600 text-xs font-mono uppercase tracking-widest">
                         or click to browse your files
@@ -175,9 +175,8 @@ export default function Studio() {
                                     onChange={(e) => setTaskType(e.target.value)}
                                     className="bg-sensor-charcoal border border-neutral-700 text-white font-mono text-xs uppercase tracking-widest px-3 py-3 outline-none hover:border-neutral-500 focus:border-white transition-colors cursor-pointer"
                                 >
-                                    <option value="denoising">Spatial Denoise</option>
-                                    <option value="low_light">Low-Light Enh</option>
-                                    <option value="enhance">Full Enhance</option>
+                                                    <option value="denoising">Spatial Denoising</option>
+                                    <option value="enhance">Low-Light Enhancement</option>
                                 </select>
                             </div>
                         )}
@@ -244,7 +243,7 @@ export default function Studio() {
             {/* Progress Footer placeholder */}
             {jobStatus === "processing" && (
                 <div className="mt-12 text-center animate-pulse">
-                    <p className="text-neutral-500 font-mono text-xs uppercase tracking-widest mb-3">Enhancing your video // {taskType.replace("_", " ")}</p>
+                    <p className="text-neutral-500 font-mono text-xs uppercase tracking-widest mb-3">Processing // {taskType === "denoising" ? "Spatial Denoising" : "Low-Light Enhancement"}</p>
                     <div className="w-64 h-px bg-neutral-800 mx-auto overflow-hidden relative">
                         <div className="absolute top-0 left-0 h-full bg-optic-amber w-1/3 animate-ping" style={{ animationDuration: "1.5s" }} />
                     </div>

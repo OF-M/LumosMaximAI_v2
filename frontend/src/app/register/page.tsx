@@ -54,6 +54,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md bg-sensor-charcoal border border-neutral-900 p-8 shadow-2xl relative z-10">
         <div className="text-center mb-8 border-b border-neutral-900 pb-6">
           <h1 className="text-2xl font-bold text-white uppercase tracking-tight">Create an Account</h1>
+          <p className="text-xs font-mono text-neutral-600 uppercase tracking-widest mt-2">Low-light enhancement & denoising</p>
         </div>
 
         {error && (
