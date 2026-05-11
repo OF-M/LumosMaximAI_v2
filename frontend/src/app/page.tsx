@@ -3,15 +3,37 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Camera, Aperture, SlidersHorizontal, ArrowRight, Zap } from "lucide-react";
+import { Camera, Aperture, SlidersHorizontal, Zap, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function LandingPage() {
   const { user } = useAuth();
-  const pricingHref = user ? "/studio" : "/register";
   const [sliderValue, setSliderValue] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleCheckout = async (plan: string) => {
+    if (!user) {
+      sessionStorage.setItem("pendingPlan", plan);
+      window.location.href = "/register";
+      return;
+    }
+    setCheckoutLoading(plan);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/payments/create-checkout-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, user_id: user.id, email: user.email }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      alert("Could not start checkout. Please try again.");
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   const handleMove = (clientX: number) => {
     if (!containerRef.current) return;
@@ -168,8 +190,8 @@ export default function LandingPage() {
               </li>
             </ul>
 
-            <Link href={pricingHref} className="w-full text-center border border-neutral-800 hover:border-white text-neutral-400 hover:text-white font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
-              Get Started
+            <Link href={user ? "/studio" : "/register"} className="w-full text-center border border-neutral-800 hover:border-white text-neutral-400 hover:text-white font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
+              Get Started Free
             </Link>
           </div>
 
@@ -204,9 +226,13 @@ export default function LandingPage() {
               </li>
             </ul>
 
-            <Link href={pricingHref} className="w-full text-center bg-optic-amber hover:bg-white text-black font-bold font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
-              Start Trial
-            </Link>
+            <button
+              onClick={() => handleCheckout("professional")}
+              disabled={checkoutLoading === "professional"}
+              className="w-full flex items-center justify-center gap-2 bg-optic-amber hover:bg-white text-black font-bold font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn disabled:opacity-60"
+            >
+              {checkoutLoading === "professional" ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting...</> : "Subscribe — £20/mo"}
+            </button>
           </div>
 
           {/* Studio Max */}
@@ -237,9 +263,13 @@ export default function LandingPage() {
               </li>
             </ul>
 
-            <Link href={pricingHref} className="w-full text-center border border-neutral-800 hover:border-white text-neutral-400 hover:text-white font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn">
-              Go Max
-            </Link>
+            <button
+              onClick={() => handleCheckout("studio_max")}
+              disabled={checkoutLoading === "studio_max"}
+              className="w-full flex items-center justify-center gap-2 border border-neutral-800 hover:border-white text-neutral-400 hover:text-white font-mono text-sm uppercase tracking-widest py-4 transition-colors tactile-btn disabled:opacity-60"
+            >
+              {checkoutLoading === "studio_max" ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting...</> : "Subscribe — £100/mo"}
+            </button>
           </div>
 
         </div>

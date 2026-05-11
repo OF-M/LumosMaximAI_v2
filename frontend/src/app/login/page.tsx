@@ -18,12 +18,25 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setError(error.message);
       setLoading(false);
     } else {
+      const pendingPlan = sessionStorage.getItem("pendingPlan");
+      if (pendingPlan && data.session) {
+        sessionStorage.removeItem("pendingPlan");
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/payments/create-checkout-session`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ plan: pendingPlan, user_id: data.session.user.id, email: data.session.user.email }),
+          });
+          const checkout = await res.json();
+          if (checkout.url) { window.location.href = checkout.url; return; }
+        } catch {}
+      }
       router.push("/studio");
     }
   };

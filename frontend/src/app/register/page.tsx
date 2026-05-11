@@ -37,9 +37,28 @@ export default function RegisterPage() {
       setError(error.message);
       setLoading(false);
     } else if (data.session) {
+      // Create a starter profile row so fetchPlan always finds a record
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/payments/create-profile`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: data.session.user.id }),
+      }).catch(() => {});
+
+      const pendingPlan = sessionStorage.getItem("pendingPlan");
+      if (pendingPlan) {
+        sessionStorage.removeItem("pendingPlan");
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/payments/create-checkout-session`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ plan: pendingPlan, user_id: data.session.user.id, email: data.session.user.email }),
+          });
+          const checkout = await res.json();
+          if (checkout.url) { window.location.href = checkout.url; return; }
+        } catch {}
+      }
       router.push("/studio");
     } else {
-      // Supabase email confirmation is enabled — redirect to login
       router.push("/login?registered=1");
     }
   };
