@@ -1,17 +1,29 @@
-from fastapi import APIRouter, HTTPException, Header, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Header, UploadFile, File, Form, Depends
 from app.models.domain import JobCreate, JobResponse
 from app.services import supabase_client, modal_service
 from typing import Optional
-import uuid
+import uuid  # noqa: F401
 
 router = APIRouter()
 
 VALID_TASK_TYPES = {"denoising", "low_light", "enhance"}
 
+
+def get_current_user(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
+    token = authorization[7:]
+    user = supabase_client.get_user_from_token(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return user
+
+
 @router.post("/upload", response_model=JobResponse, status_code=202)
 async def upload_and_enhance(
     file: UploadFile = File(...),
     task_type: str = Form("denoising"),
+    user=Depends(get_current_user),
 ):
     """
     Accept a video file, upload it to Supabase Storage via service_role key
@@ -40,7 +52,7 @@ async def upload_and_enhance(
     if not video:
         raise HTTPException(status_code=500, detail="Failed to create video record")
 
-    job = supabase_client.create_job(video_id=video["id"], task_type=task_type)
+    job = supabase_client.create_job(video_id=video["id"], task_type=task_type, user_id=user.id)
     if not job:
         raise HTTPException(status_code=500, detail="Failed to create job record")
 
@@ -95,11 +107,11 @@ def create_enhancement_job(job_req: JobCreate, authorization: Optional[str] = He
     )
 
 @router.get("/")
-def list_jobs():
+def list_jobs(user=Depends(get_current_user)):
     """
-    List all enhancement jobs.
+    List enhancement jobs for the authenticated user.
     """
-    return supabase_client.get_all_jobs()
+    return supabase_client.get_jobs_by_user(user.id)
 
 @router.get("/{job_id}")
 def get_job_status(job_id: str):
@@ -113,13 +125,15 @@ def get_job_status(job_id: str):
     return job
 
 @router.delete("/{job_id}", status_code=204)
-def delete_job(job_id: str):
+def delete_job(job_id: str, user=Depends(get_current_user)):
     """
-    Delete a job record.
+    Delete a job record (only the owner can delete).
     """
     job = supabase_client.get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+    if job.get("user_id") != user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this job")
 
     supabase_client.delete_job(job_id)
     return

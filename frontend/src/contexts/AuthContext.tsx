@@ -40,21 +40,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [plan, setPlan] = useState<Plan>("starter");
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) setPlan(await fetchPlan(session.user.id));
-      setLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(async ({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        try {
+          if (session?.user) setPlan(await fetchPlan(session.user.id));
+        } finally {
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        setPlan(await fetchPlan(session.user.id));
-      } else {
-        setPlan("starter");
-      }
+      try {
+        if (session?.user) {
+          setPlan(await fetchPlan(session.user.id));
+        } else {
+          setPlan("starter");
+        }
+      } catch {}
     });
 
     return () => subscription.unsubscribe();

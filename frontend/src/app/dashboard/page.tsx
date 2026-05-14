@@ -5,6 +5,7 @@ import axios from "axios";
 import { ArrowLeft, Loader2, PlayCircle, Eye, Trash, History, Download, AlertCircle, MessageSquare, Check, X } from "lucide-react";
 import Link from "next/link";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { supabase } from "@/lib/supabaseClient";
 
 interface Job {
     id: string;
@@ -68,10 +69,16 @@ export default function Dashboard() {
         URL.revokeObjectURL(a.href);
     };
 
+    const getAuthHeader = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+    };
+
     const deleteJob = async (jobId: string) => {
         setDeletingId(jobId);
         try {
-            await axios.delete(`http://localhost:8000/api/v1/jobs/${jobId}`);
+            const headers = await getAuthHeader();
+            await axios.delete(`http://localhost:8000/api/v1/jobs/${jobId}`, { headers });
             setJobs((prev) => prev.filter((j) => j.id !== jobId));
             const updated = { ...notes };
             delete updated[jobId];
@@ -86,7 +93,8 @@ export default function Dashboard() {
 
     const fetchJobs = async () => {
         try {
-            const res = await axios.get("http://localhost:8000/api/v1/jobs/");
+            const headers = await getAuthHeader();
+            const res = await axios.get("http://localhost:8000/api/v1/jobs/", { headers });
             setJobs(res.data);
         } catch (err) {
             console.error("Failed to fetch jobs:", err);

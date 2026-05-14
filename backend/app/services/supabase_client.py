@@ -34,8 +34,20 @@ def create_video(filename: str, original_url: str, size_mb: float = None):
         return response.data[0]
     return None
 
+def get_user_from_token(token: str):
+    try:
+        response = supabase.auth.get_user(token)
+        return response.user
+    except Exception as e:
+        print(f"Auth token error: {e}")
+        return None
+
 def get_all_jobs():
     response = supabase.table("jobs").select("*, videos(filename, original_url, size_mb)").order("created_at", desc=True).execute()
+    return response.data or []
+
+def get_jobs_by_user(user_id: str):
+    response = supabase.table("jobs").select("*, videos(filename, original_url, size_mb)").eq("user_id", user_id).order("created_at", desc=True).execute()
     return response.data or []
 
 def create_job(video_id: str, user_id: str = None, task_type: str = "denoising"):

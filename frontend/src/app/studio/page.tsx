@@ -5,6 +5,7 @@ import axios from "axios";
 import { UploadCloud, FileVideo, Wand2, Loader2, Download, History, ArrowLeft, SplitSquareHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Studio() {
     const { user, loading: authLoading } = useRequireAuth();
@@ -54,10 +55,18 @@ export default function Studio() {
             formData.append("file", file);
             formData.append("task_type", taskType);
 
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+
             const response = await axios.post(
                 "http://localhost:8000/api/v1/jobs/upload",
                 formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                }
             );
 
             setJobId(response.data.job_id);
