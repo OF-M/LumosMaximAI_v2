@@ -4,11 +4,30 @@ import React, { useState, useCallback, useEffect } from "react";
 import axios from "axios";
 import { UploadCloud, FileVideo, Wand2, Loader2, Download, History, ArrowLeft, SplitSquareHorizontal } from "lucide-react";
 import Link from "next/link";
-import { useRequireAuth } from "@/hooks/useRequireAuth";
-import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://127.0.0.1:8000";
 
 export default function Studio() {
-    const { user, loading: authLoading } = useRequireAuth();
+    const { user, session, loading: authLoading } = useAuth();
+    const router = useRouter();
+    const [authTimedOut, setAuthTimedOut] = useState(false);
+
+    useEffect(() => {
+        if (!authLoading && !user) router.push("/login");
+    }, [authLoading, user, router]);
+
+    // Safety valve: if auth takes more than 6s, treat as unauthenticated
+    useEffect(() => {
+        if (!authLoading) return;
+        const t = setTimeout(() => setAuthTimedOut(true), 6000);
+        return () => clearTimeout(t);
+    }, [authLoading]);
+
+    useEffect(() => {
+        if (authTimedOut && !user) router.push("/login");
+    }, [authTimedOut, user, router]);
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
     const [jobId, setJobId] = useState<string | null>(null);
@@ -17,28 +36,30 @@ export default function Studio() {
     const [errorMSG, setErrorMSG] = useState<string | null>(null);
     const [taskType, setTaskType] = useState<string>("denoising");
 
+    const resetState = useCallback(() => {
+        setJobId(null);
+        setJobStatus(null);
+        setJobData(null);
+        setErrorMSG(null);
+        setUploading(false);
+    }, []);
+
     const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         const droppedFile = e.dataTransfer.files[0];
         if (droppedFile && droppedFile.type.startsWith("video/")) {
             setFile(droppedFile);
-            setJobId(null);
-            setJobStatus(null);
-            setJobData(null);
-            setErrorMSG(null);
+            resetState();
         } else {
             setErrorMSG("Please select a valid video file.");
         }
-    }, []);
+    }, [resetState]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
         if (selectedFile && selectedFile.type.startsWith("video/")) {
             setFile(selectedFile);
-            setJobId(null);
-            setJobStatus(null);
-            setJobData(null);
-            setErrorMSG(null);
+            resetState();
         } else {
             setErrorMSG("Please select a valid video file.");
         }
@@ -55,24 +76,27 @@ export default function Studio() {
             formData.append("file", file);
             formData.append("task_type", taskType);
 
-            const { data: { session } } = await supabase.auth.getSession();
             const token = session?.access_token;
 
             const response = await axios.post(
-                "http://localhost:8000/api/v1/jobs/upload",
+                `${BACKEND}/api/v1/jobs/upload`,
                 formData,
                 {
                     headers: {
                         "Content-Type": "multipart/form-data",
                         ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
+                    timeout: 60000,
                 }
             );
 
             setJobId(response.data.job_id);
             setJobStatus("processing");
         } catch (err: any) {
-            const detail = err.response?.data?.detail || err.message || "Failed to process the video. Ensure backend is running.";
+            const isTimeout = err.code === "ECONNABORTED";
+            const detail = isTimeout
+                ? "Request timed out. The server may be busy — please try again."
+                : (err.response?.data?.detail || err.message || "Failed to process the video. Ensure backend is running.");
             setErrorMSG(detail);
             console.error(err);
         } finally {
@@ -86,7 +110,7 @@ export default function Studio() {
         if (jobId && (jobStatus === "processing" || jobStatus === "pending")) {
             interval = setInterval(async () => {
                 try {
-                    const res = await axios.get(`http://localhost:8000/api/v1/jobs/${jobId}`);
+                    const res = await axios.get(`${BACKEND}/api/v1/jobs/${jobId}`);
                     setJobData(res.data);
                     setJobStatus(res.data.status);
 
@@ -184,8 +208,9 @@ export default function Studio() {
                                     onChange={(e) => setTaskType(e.target.value)}
                                     className="bg-sensor-charcoal border border-neutral-700 text-white font-mono text-xs uppercase tracking-widest px-3 py-3 outline-none hover:border-neutral-500 focus:border-white transition-colors cursor-pointer"
                                 >
-                                                    <option value="denoising">Spatial Denoising</option>
-                                    <option value="enhance">Low-Light Enhancement</option>
+                                    <option value="denoising">Spatial Denoising</option>
+                                    <option value="low_light">Low-Light Only</option>
+                                    <option value="enhance">Low-Light + Denoising</option>
                                 </select>
                             </div>
                         )}
@@ -193,14 +218,25 @@ export default function Studio() {
                         {/* Status / Actions */}
                         <div className="flex items-center gap-3 w-full md:w-auto">
                             {!jobId ? (
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); startEnhancement(); }}
-                                    disabled={uploading}
-                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-titanium hover:bg-white text-black px-6 py-3 font-bold font-mono text-xs uppercase tracking-widest transition-colors tactile-btn disabled:opacity-50"
-                                >
-                                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-                                    {uploading ? "Uploading" : "Enhance Video"}
-                                </button>
+                                <div className="flex items-center gap-2 flex-1 md:flex-none">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); startEnhancement(); }}
+                                        disabled={uploading}
+                                        className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-titanium hover:bg-white text-black px-6 py-3 font-bold font-mono text-xs uppercase tracking-widest transition-colors tactile-btn disabled:opacity-50"
+                                    >
+                                        {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                        {uploading ? "Uploading" : "Enhance Video"}
+                                    </button>
+                                    {uploading && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); resetState(); }}
+                                            className="flex items-center justify-center px-3 py-3 border border-neutral-700 hover:border-red-500 text-neutral-500 hover:text-red-400 font-mono text-xs uppercase tracking-widest transition-colors"
+                                            title="Cancel upload"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
                             ) : (
                                 <div className="flex items-center gap-3 w-full md:w-auto">
                                     {(jobStatus === "processing" || jobStatus === "pending") && (
@@ -252,7 +288,7 @@ export default function Studio() {
             {/* Progress Footer placeholder */}
             {jobStatus === "processing" && (
                 <div className="mt-12 text-center animate-pulse">
-                    <p className="text-neutral-500 font-mono text-xs uppercase tracking-widest mb-3">Processing // {taskType === "denoising" ? "Spatial Denoising" : "Low-Light Enhancement"}</p>
+                    <p className="text-neutral-500 font-mono text-xs uppercase tracking-widest mb-3">Processing // {taskType === "denoising" ? "Spatial Denoising" : taskType === "low_light" ? "Low-Light Only" : "Low-Light + Denoising"}</p>
                     <div className="w-64 h-px bg-neutral-800 mx-auto overflow-hidden relative">
                         <div className="absolute top-0 left-0 h-full bg-optic-amber w-1/3 animate-ping" style={{ animationDuration: "1.5s" }} />
                     </div>

@@ -271,8 +271,10 @@ def _build_nafnet(width: int = 32):
             B, C, H, W = inp.shape
             hp = (-H) % self.pad
             wp = (-W) % self.pad
-            x = F.pad(inp, (0, wp, 0, hp))
-            x = self.intro(x)
+            # Save padded input for residual — slicing inp directly would give wrong shape
+            # when H or W are not multiples of self.pad (e.g. 1080p: 1080 % 16 = 8)
+            inp_padded = F.pad(inp, (0, wp, 0, hp))
+            x = self.intro(inp_padded)
             encs = []
             for enc, down in zip(self.encoders, self.downs):
                 for blk in enc:
@@ -285,7 +287,7 @@ def _build_nafnet(width: int = 32):
                 x = up(x) + skip
                 for blk in dec:
                     x = blk(x)
-            x = self.ending(x) + inp[:, :, :H + hp, :W + wp]
+            x = self.ending(x) + inp_padded
             return x[:, :, :H, :W].clamp(0, 1)
 
     return NAFNet(w=width)
@@ -650,11 +652,12 @@ def _upload_to_supabase(local_path: str, filename: str) -> str:
 
 def _update_job(job_id: str, status: str, enhanced_url: str = None, error: str = None):
     from supabase import create_client
+    from datetime import datetime, timezone
     client = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
     data = {"status": status}
     if enhanced_url:
         data["enhanced_url"] = enhanced_url
-        data["completed_at"] = "now()"
+        data["completed_at"] = datetime.now(timezone.utc).isoformat()
     if error:
         data["error_log"] = error
     client.table("jobs").update(data).eq("id", job_id).execute()

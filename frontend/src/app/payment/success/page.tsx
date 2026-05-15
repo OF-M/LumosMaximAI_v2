@@ -1,18 +1,32 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams } from "next/navigation";
 
-export default function PaymentSuccess() {
-  const { refreshPlan } = useAuth();
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://127.0.0.1:8000";
+
+function PaymentSuccessContent() {
+  const { user, session, refreshPlan } = useAuth();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Give the webhook a moment to process, then refresh the plan in context
-    const t = setTimeout(() => refreshPlan(), 2000);
-    return () => clearTimeout(t);
-  }, []);
+    const sessionId = searchParams.get("session_id");
+    if (!sessionId || !user || !session?.access_token) return;
+
+    fetch(`${BACKEND}/api/v1/payments/sync-session`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ session_id: sessionId, user_id: user.id }),
+    })
+      .then(() => refreshPlan())
+      .catch(() => setTimeout(() => refreshPlan(), 3000));
+  }, [user?.id, session?.access_token, searchParams, refreshPlan]);
 
   return (
     <main className="min-h-screen bg-sensor-black text-titanium flex flex-col items-center justify-center px-6 font-sans noise-overlay relative">
@@ -36,5 +50,17 @@ export default function PaymentSuccess() {
         </Link>
       </div>
     </main>
+  );
+}
+
+export default function PaymentSuccess() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-sensor-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-neutral-500 animate-spin" />
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }

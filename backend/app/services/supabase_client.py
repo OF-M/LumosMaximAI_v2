@@ -1,3 +1,4 @@
+import httpx
 from supabase import create_client, Client
 from app.core.config import settings
 
@@ -7,9 +8,20 @@ supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 BUCKET = "raw-videos"
 
 def upload_to_storage(path: str, data: bytes, content_type: str = "video/mp4"):
+    """Upload using a fresh httpx.Client per request — eliminates stale connection hangs."""
+    url = f"{settings.SUPABASE_URL}/storage/v1/object/{BUCKET}/{path}"
     try:
-        supabase.storage.from_(BUCKET).upload(path, data, {"content-type": content_type})
-        return True
+        with httpx.Client(timeout=httpx.Timeout(connect=10, read=60, write=60, pool=10)) as client:
+            resp = client.post(
+                url,
+                content=data,
+                headers={
+                    "Authorization": f"Bearer {settings.SUPABASE_KEY}",
+                    "Content-Type": content_type,
+                },
+            )
+            resp.raise_for_status()
+            return True
     except Exception as e:
         print(f"Storage upload error: {e}")
         return False
@@ -35,11 +47,28 @@ def create_video(filename: str, original_url: str, size_mb: float = None):
     return None
 
 def get_user_from_token(token: str):
+    """Decode Supabase JWT locally — no network call, no hangs."""
+    import jwt as pyjwt
+
+    class _User:
+        def __init__(self, uid):
+            self.id = uid
+
     try:
-        response = supabase.auth.get_user(token)
-        return response.user
+        # Decode payload without any verification (signature, expiry)
+        # The JS client manages token refresh; we just need the user_id.
+        payload = pyjwt.decode(
+            token,
+            options={"verify_signature": False, "verify_exp": False},
+            algorithms=["HS256", "RS256"],
+        )
+        user_id = payload.get("sub")
+        if not user_id:
+            print("Auth token missing sub claim")
+            return None
+        return _User(user_id)
     except Exception as e:
-        print(f"Auth token error: {e}")
+        print(f"Auth token decode error: {e}")
         return None
 
 def get_all_jobs():

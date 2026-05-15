@@ -21,6 +21,8 @@ function formatTime(s: number) {
     return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://127.0.0.1:8000";
+
 export default function Compare() {
     const { user, loading: authLoading } = useRequireAuth();
     const [job, setJob] = useState<JobData | null>(null);
@@ -37,7 +39,7 @@ export default function Compare() {
         const id = new URLSearchParams(window.location.search).get("jobId");
         if (!id) { setErrorMSG("No Job ID in URL."); setLoading(false); return; }
 
-        axios.get(`http://localhost:8000/api/v1/jobs/${id}`)
+        axios.get(`${BACKEND}/api/v1/jobs/${id}`)
             .then(res => {
                 const data: JobData = res.data;
                 if (data.status !== "completed") setErrorMSG("This job is not completed yet.");
@@ -106,7 +108,7 @@ export default function Compare() {
     const originalUrl = job.videos?.original_url ?? "";
     const enhancedUrl = job.enhanced_url ?? "";
     const filename = job.videos?.filename ?? "video";
-    const taskLabel = job.task_type === "enhance" ? "Low-Light Enhancement" : job.task_type === "denoising" ? "Spatial Denoising" : job.task_type ?? "unknown";
+    const taskLabel = job.task_type === "enhance" ? "Low-Light + Denoising" : job.task_type === "low_light" ? "Low-Light Only" : job.task_type === "denoising" ? "Spatial Denoising" : job.task_type ?? "unknown";
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
     return (

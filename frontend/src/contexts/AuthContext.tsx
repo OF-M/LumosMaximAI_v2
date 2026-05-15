@@ -25,12 +25,14 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 async function fetchPlan(userId: string): Promise<Plan> {
-  const { data } = await supabase
+  const timeout = new Promise<Plan>((resolve) => setTimeout(() => resolve("starter"), 4000));
+  const query = supabase
     .from("profiles")
     .select("plan")
     .eq("id", userId)
-    .single();
-  return (data?.plan as Plan) ?? "starter";
+    .single()
+    .then(({ data }) => (data?.plan as Plan) ?? "starter");
+  return Promise.race([query, timeout]);
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

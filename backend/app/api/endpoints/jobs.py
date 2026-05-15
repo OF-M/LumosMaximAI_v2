@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Header, UploadFile, File, Form, De
 from app.models.domain import JobCreate, JobResponse
 from app.services import supabase_client, modal_service
 from typing import Optional
-import uuid  # noqa: F401
+import uuid
 
 router = APIRouter()
 
@@ -37,7 +37,6 @@ async def upload_and_enhance(
     storage_path = f"{uuid.uuid4()}.{ext}"
     content_type = file.content_type or "video/mp4"
 
-    # Upload using service_role key — bypasses RLS entirely
     upload_result = supabase_client.upload_to_storage(storage_path, file_bytes, content_type)
     if not upload_result:
         raise HTTPException(status_code=500, detail="Failed to upload video to storage")

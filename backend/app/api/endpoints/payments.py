@@ -29,6 +29,10 @@ class CheckoutRequest(BaseModel):
 class ProfileRequest(BaseModel):
     user_id: str
 
+class SyncSessionRequest(BaseModel):
+    session_id: str
+    user_id: str
+
 @router.post("/create-profile")
 async def create_profile(body: ProfileRequest):
     supabase.table("profiles").upsert(
@@ -106,3 +110,35 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
                     supabase.table("profiles").update({"plan": updated_plan}).eq("id", user_id).execute()
 
     return JSONResponse({"received": True})
+
+
+@router.post("/sync-session")
+async def sync_session(body: SyncSessionRequest):
+    """Fallback for when webhook can't reach localhost — frontend calls this after redirect."""
+    try:
+        session = stripe.checkout.Session.retrieve(body.session_id)
+    except stripe.StripeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    if session.get("status") != "complete" or session.get("payment_status") != "paid":
+        raise HTTPException(status_code=400, detail="Session not completed")
+
+    metadata = session.get("metadata") or {}
+    session_user_id = metadata.get("user_id")
+
+    if session_user_id != body.user_id:
+        raise HTTPException(status_code=403, detail="User ID mismatch")
+
+    plan = metadata.get("plan")
+    stripe_customer_id = session.get("customer")
+
+    if not plan:
+        raise HTTPException(status_code=400, detail="No plan in session metadata")
+
+    supabase.table("profiles").upsert({
+        "id": body.user_id,
+        "plan": plan,
+        "stripe_customer_id": stripe_customer_id,
+    }).execute()
+
+    return {"ok": True, "plan": plan}

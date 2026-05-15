@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { ArrowLeft, Loader2, PlayCircle, Eye, Trash, History, Download, AlertCircle, MessageSquare, Check, X } from "lucide-react";
+import { Loader2, PlayCircle, Eye, Trash, History, Download, AlertCircle, MessageSquare, Check, X } from "lucide-react";
 import Link from "next/link";
-import { useRequireAuth } from "@/hooks/useRequireAuth";
-import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Job {
     id: string;
@@ -20,11 +20,25 @@ interface Job {
     } | null;
 }
 
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://127.0.0.1:8000";
+
 export default function Dashboard() {
-    const { user, loading: authLoading } = useRequireAuth();
+    const { user, session, loading: authLoading } = useAuth();
+    const router = useRouter();
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [authTimedOut, setAuthTimedOut] = useState(false);
+
+    useEffect(() => {
+        if (!authLoading) return;
+        const t = setTimeout(() => setAuthTimedOut(true), 6000);
+        return () => clearTimeout(t);
+    }, [authLoading]);
+
+    useEffect(() => {
+        if (authTimedOut && !user) router.push("/login");
+    }, [authTimedOut, user, router]);
 
     const [notes, setNotes] = useState<Record<string, string>>({});
     const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
@@ -69,16 +83,14 @@ export default function Dashboard() {
         URL.revokeObjectURL(a.href);
     };
 
-    const getAuthHeader = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
-    };
+    const authHeader = session?.access_token
+        ? { Authorization: `Bearer ${session.access_token}` }
+        : {};
 
     const deleteJob = async (jobId: string) => {
         setDeletingId(jobId);
         try {
-            const headers = await getAuthHeader();
-            await axios.delete(`http://localhost:8000/api/v1/jobs/${jobId}`, { headers });
+            await axios.delete(`${BACKEND}/api/v1/jobs/${jobId}`, { headers: authHeader });
             setJobs((prev) => prev.filter((j) => j.id !== jobId));
             const updated = { ...notes };
             delete updated[jobId];
@@ -91,23 +103,32 @@ export default function Dashboard() {
         }
     };
 
-    const fetchJobs = async () => {
+    const fetchJobs = useCallback(async (token: string) => {
         try {
-            const headers = await getAuthHeader();
-            const res = await axios.get("http://localhost:8000/api/v1/jobs/", { headers });
+            const res = await axios.get(`${BACKEND}/api/v1/jobs/`, {
+                headers: { Authorization: `Bearer ${token}` },
+                timeout: 10000,
+            });
             setJobs(res.data);
         } catch (err) {
             console.error("Failed to fetch jobs:", err);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        fetchJobs();
-        const intervalId = setInterval(fetchJobs, 5000);
+        if (!authLoading && !user) {
+            router.push("/login");
+            return;
+        }
+        const token = session?.access_token;
+        if (!token) return;
+        setLoading(true);
+        fetchJobs(token);
+        const intervalId = setInterval(() => fetchJobs(token), 5000);
         return () => clearInterval(intervalId);
-    }, []);
+    }, [authLoading, user, session?.access_token, fetchJobs, router]);
 
     if (authLoading || !user) return (
         <div className="min-h-screen bg-sensor-black flex items-center justify-center">
@@ -181,7 +202,7 @@ export default function Dashboard() {
                                 <div className="p-5 flex-grow flex flex-col">
                                     <div className="flex items-center justify-between mb-4">
                                         <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-black bg-white px-2 py-1">
-                                            {job.task_type === "enhance" ? "Low-Light Enhancement" : job.task_type === "denoising" ? "Spatial Denoising" : job.task_type ?? "unknown"}
+                                            {job.task_type === "enhance" ? "Low-Light + Denoising" : job.task_type === "low_light" ? "Low-Light Only" : job.task_type === "denoising" ? "Spatial Denoising" : job.task_type ?? "unknown"}
                                         </span>
                                         <span className="text-[10px] font-mono text-neutral-600 uppercase tracking-wider">
                                             {new Date(job.created_at).toLocaleDateString()}

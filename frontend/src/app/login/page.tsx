@@ -1,17 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight, Github } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Redirect already-logged-in users away from login page
+  useEffect(() => {
+    if (!authLoading && user) {
+      const pending = sessionStorage.getItem("pendingPlan");
+      router.replace(pending ? "/#pricing" : "/studio");
+    }
+  }, [authLoading, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +45,12 @@ export default function LoginPage() {
           });
           const checkout = await res.json();
           if (checkout.url) { window.location.href = checkout.url; return; }
-        } catch {}
+          setError("Signed in! Checkout could not start — please select your plan from the pricing page.");
+        } catch {
+          setError("Signed in! Checkout could not start — please select your plan from the pricing page.");
+        }
+        setLoading(false);
+        return;
       }
       router.push("/studio");
     }

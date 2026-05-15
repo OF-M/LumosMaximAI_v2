@@ -11,9 +11,11 @@ export default function LandingPage() {
   const [sliderValue, setSliderValue] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleCheckout = async (plan: string) => {
+    setCheckoutError(null);
     if (!user) {
       sessionStorage.setItem("pendingPlan", plan);
       window.location.href = "/register";
@@ -27,9 +29,10 @@ export default function LandingPage() {
         body: JSON.stringify({ plan, user_id: user.id, email: user.email }),
       });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      if (data.url) { window.location.href = data.url; return; }
+      setCheckoutError("Could not start checkout. Please try again.");
     } catch {
-      alert("Could not start checkout. Please try again.");
+      setCheckoutError("Could not start checkout. Please try again.");
     } finally {
       setCheckoutLoading(null);
     }
@@ -156,6 +159,12 @@ export default function LandingPage() {
       {/* Pricing Specifications */}
       <section id="pricing" className="py-32 px-6 max-w-7xl mx-auto relative z-10">
         <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
+
+        {checkoutError && (
+          <div className="mb-8 relative z-10 px-4 py-3 bg-red-950/50 border border-red-800 text-red-400 text-xs font-mono uppercase tracking-wide">
+            {checkoutError}
+          </div>
+        )}
 
         <div className="mb-20 relative z-10 border-b border-neutral-900 pb-8 flex justify-between items-end">
           <div>
