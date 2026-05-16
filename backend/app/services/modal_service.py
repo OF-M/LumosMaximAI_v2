@@ -1,11 +1,17 @@
-import modal
+try:
+    import modal
+    _modal_available = True
+except ImportError:
+    _modal_available = False
 
 def trigger_enhancement_job(job_id: str, video_url: str, task_type: str = "denoising"):
     """
     Triggers the Serverless GPU worker on Modal.com asynchronously.
     """
+    if not _modal_available:
+        print("Modal not installed — skipping GPU trigger")
+        return False
     try:
-        # Use the new modal Cls/Function API
         process_video = modal.Function.from_name("lumos-maxim-ai-worker", "process_video")
 
         # .spawn() runs the function in the background and returns immediately
