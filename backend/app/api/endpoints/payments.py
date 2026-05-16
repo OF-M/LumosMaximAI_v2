@@ -114,10 +114,17 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
 
 @router.post("/sync-session")
 async def sync_session(body: SyncSessionRequest):
-    """Fallback for when webhook can't reach localhost — frontend calls this after redirect."""
+    """Fallback for when webhook can't reach localhost — uses Stripe REST API directly."""
+    import httpx
     try:
-        session = stripe.checkout.Session.retrieve(body.session_id)
-    except stripe.StripeError as e:
+        resp = httpx.get(
+            f"https://api.stripe.com/v1/checkout/sessions/{body.session_id}",
+            auth=(settings.STRIPE_SECRET_KEY, ""),
+            timeout=10,
+        )
+        resp.raise_for_status()
+        session = resp.json()
+    except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
     if session.get("status") != "complete" or session.get("payment_status") != "paid":
