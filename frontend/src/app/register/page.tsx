@@ -79,7 +79,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen bg-sensor-black text-titanium flex flex-col items-center justify-center pt-32 pb-12 px-6 relative overflow-hidden font-sans noise-overlay">
+    <main className="min-h-screen bg-sensor-black text-titanium flex flex-col items-center justify-center pt-20 md:pt-28 pb-12 px-4 relative overflow-hidden font-sans noise-overlay">
 
       {/* Background Grid */}
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />

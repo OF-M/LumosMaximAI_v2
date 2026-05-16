@@ -116,7 +116,7 @@ function VideoPanel({ videoRef, src, videoProps, labelLeft, labelRight, borderRi
     };
 
     return (
-        <div className={`flex-1 flex flex-col min-w-0 ${borderRight ? "border-r border-neutral-900" : ""}`}>
+        <div className={`flex-1 flex flex-col min-w-0 min-h-[40vh] md:min-h-0 ${borderRight ? "border-b md:border-b-0 md:border-r border-neutral-900" : ""}`}>
             <div className="px-5 py-3 border-b border-neutral-900 shrink-0 flex items-center justify-between">
                 {labelLeft}
                 {labelRight}
@@ -243,29 +243,29 @@ export default function Compare() {
             <div className="absolute inset-0 grid-bg opacity-10 pointer-events-none" />
 
             {/* Header */}
-            <header className="w-full flex items-center justify-between px-8 py-5 border-b border-neutral-900 z-10 shrink-0">
-                <div className="flex items-center gap-4">
-                    <Link href="/dashboard" className="text-neutral-500 hover:text-white transition-colors flex items-center gap-2 font-mono text-xs uppercase tracking-widest">
+            <header className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-8 py-3 sm:py-5 border-b border-neutral-900 z-10 shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                    <Link href="/dashboard" className="text-neutral-500 hover:text-white transition-colors flex items-center gap-2 font-mono text-xs uppercase tracking-widest shrink-0">
                         <ArrowLeft className="w-4 h-4" /> Dashboard
                     </Link>
-                    <span className="text-neutral-800">|</span>
-                    <span className="font-mono text-xs text-neutral-500 uppercase tracking-widest truncate max-w-xs">{filename}</span>
+                    <span className="text-neutral-800 hidden sm:block">|</span>
+                    <span className="font-mono text-xs text-neutral-500 uppercase tracking-widest truncate hidden sm:block">{filename}</span>
                 </div>
-                <div className="flex items-center gap-3">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-black bg-white px-2 py-1">{taskLabel}</span>
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-black bg-white px-2 py-1 hidden sm:block">{taskLabel}</span>
                     <a
                         href={enhancedUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 bg-black border border-neutral-700 hover:border-white text-white px-4 py-2 font-mono text-xs uppercase tracking-widest transition-colors tactile-btn"
+                        className="flex items-center gap-2 bg-black border border-neutral-700 hover:border-white text-white px-3 sm:px-4 py-2 font-mono text-xs uppercase tracking-widest transition-colors tactile-btn"
                     >
-                        <Download className="w-3.5 h-3.5" /> Download Enhanced
+                        <Download className="w-3.5 h-3.5" /> Download
                     </a>
                 </div>
             </header>
 
             {/* Videos */}
-            <div className="flex flex-1 z-10 min-h-0">
+            <div className="flex flex-col md:flex-row flex-1 z-10 min-h-0">
                 <VideoPanel
                     videoRef={originalRef}
                     src={originalUrl}
@@ -293,7 +293,7 @@ export default function Compare() {
             </div>
 
             {/* Controls */}
-            <div className="w-full flex flex-col gap-4 px-8 py-5 border-t border-neutral-900 z-10 shrink-0 bg-sensor-black">
+            <div className="w-full flex flex-col gap-4 px-4 sm:px-8 py-4 sm:py-5 border-t border-neutral-900 z-10 shrink-0 bg-sensor-black">
                 {/* Seek bar */}
                 <div className="flex items-center gap-4">
                     <span className="font-mono text-[10px] text-neutral-500 w-10 text-right tabular-nums shrink-0">
@@ -326,7 +326,7 @@ export default function Compare() {
                 </div>
 
                 {/* Play / Pause row */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <p className="text-neutral-600 font-mono text-xs uppercase tracking-widest">
                         Before &amp; After — synchronized playback
                     </p>

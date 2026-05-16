@@ -137,7 +137,7 @@ export default function Dashboard() {
     );
 
     return (
-        <main className="min-h-screen bg-sensor-black text-titanium flex flex-col pt-32 pb-16 px-4 md:px-10 font-sans noise-overlay relative overflow-hidden">
+        <main className="min-h-screen bg-sensor-black text-titanium flex flex-col pt-20 md:pt-32 pb-16 px-4 md:px-10 font-sans noise-overlay relative overflow-hidden">
 
             {/* Background Grid */}
             <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />

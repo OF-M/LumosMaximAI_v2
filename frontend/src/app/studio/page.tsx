@@ -136,13 +136,13 @@ export default function Studio() {
     );
 
     return (
-        <main className="min-h-screen bg-sensor-black text-titanium flex flex-col items-center pt-32 pb-20 px-4 font-sans selection:bg-optic-amber/30 noise-overlay relative overflow-hidden">
+        <main className="min-h-screen bg-sensor-black text-titanium flex flex-col items-center pt-20 md:pt-32 pb-20 px-4 font-sans selection:bg-optic-amber/30 noise-overlay relative overflow-hidden">
 
             {/* Background Grid */}
             <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
 
             {/* Top Navbar */}
-            <nav className="w-full max-w-6xl flex justify-between z-10 mb-12">
+            <nav className="w-full max-w-6xl flex justify-between z-10 mb-8 md:mb-12">
                 <Link href="/" className="flex items-center gap-2 text-neutral-500 hover:text-white font-mono text-xs uppercase tracking-widest transition-colors tactile-btn">
                     <ArrowLeft className="w-4 h-4" /> Home
                 </Link>
@@ -160,13 +160,13 @@ export default function Studio() {
                 </p>
             </header>
 
-            <section className="w-full max-w-2xl bg-sensor-charcoal border border-neutral-900 p-8 shadow-2xl z-10 relative">
+            <section className="w-full max-w-2xl bg-sensor-charcoal border border-neutral-900 p-4 sm:p-8 shadow-2xl z-10 relative">
 
                 {/* Upload Zone */}
                 <div
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleDrop}
-                    className="border border-dashed border-neutral-700 hover:border-neutral-400 bg-black transition-colors duration-300 p-12 text-center flex flex-col items-center justify-center cursor-pointer group"
+                    className="border border-dashed border-neutral-700 hover:border-neutral-400 bg-black transition-colors duration-300 p-8 md:p-12 text-center flex flex-col items-center justify-center cursor-pointer group"
                     onClick={() => document.getElementById("fileInput")?.click()}
                 >
                     <input

@@ -62,7 +62,7 @@ export default function LandingPage() {
       >
         
         {/* Base Hero (Sharp & Enhanced) */}
-        <section className="relative pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center z-10 min-h-[70vh] justify-center pointer-events-auto">
+        <section className="relative pt-24 md:pt-40 pb-20 px-4 md:px-6 max-w-7xl mx-auto flex flex-col items-center text-center z-10 min-h-[70vh] justify-center pointer-events-auto">
           {/* Calibrated Grid Background */}
           <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
 
@@ -70,11 +70,11 @@ export default function LandingPage() {
             <span className="w-2 h-2 rounded-full bg-optic-cyan animate-pulse" /> Low-Light Enhancement & Denoising
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter max-w-4xl text-titanium mb-8 leading-[1.1] relative z-10 pointer-events-none">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter max-w-4xl text-titanium mb-8 leading-[1.1] relative z-10 pointer-events-none">
             Bring dark footage <span className="text-white relative"><span className="absolute -left-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full"></span>to the light.</span>
           </h1>
-          <p className="text-xl md:text-2xl text-neutral-500 max-w-2xl font-medium mb-12 relative z-10 font-mono text-sm uppercase tracking-wide pointer-events-none">
-            AI-powered low-light enhancement and spatial denoising for dark, grainy footage. <br /> Upload a clip. Get a clean result.
+          <p className="text-neutral-500 max-w-2xl font-medium mb-12 relative z-10 font-mono text-xs sm:text-sm uppercase tracking-wide pointer-events-none">
+            AI-powered low-light enhancement and spatial denoising for dark, grainy footage. Upload a clip. Get a clean result.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 relative z-20">
@@ -123,11 +123,11 @@ export default function LandingPage() {
       </div>
 
       {/* Features Outline */}
-      <section className="py-24 border-y border-neutral-900 relative bg-sensor-charcoal overflow-hidden z-10">
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-12 gap-12">
-          
-          <div className="md:col-span-4 space-y-6 border-r border-neutral-900 pr-8">
-            <div className="text-xs font-mono text-neutral-600 uppercase tracking-widest mb-12">Feature // 01</div>
+      <section className="py-16 md:py-24 border-y border-neutral-900 relative bg-sensor-charcoal overflow-hidden z-10">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 grid md:grid-cols-12 gap-8 md:gap-12">
+
+          <div className="md:col-span-4 space-y-6 md:border-r border-neutral-900 md:pr-8 pb-8 md:pb-0 border-b md:border-b-0">
+            <div className="text-xs font-mono text-neutral-600 uppercase tracking-widest mb-8 md:mb-12">Feature // 01</div>
             <div className="w-12 h-12 bg-black border border-neutral-800 flex items-center justify-center">
               <Camera className="w-5 h-5 text-optic-amber" />
             </div>
@@ -135,8 +135,8 @@ export default function LandingPage() {
             <p className="text-neutral-500 leading-relaxed font-mono text-sm">Recover detail from dark, underexposed footage using a Zero-DCE-based neural network trained on low-light video pairs.</p>
           </div>
 
-          <div className="md:col-span-4 space-y-6 border-r border-neutral-900 px-4">
-            <div className="text-xs font-mono text-neutral-600 uppercase tracking-widest mb-12">Feature // 02</div>
+          <div className="md:col-span-4 space-y-6 md:border-r border-neutral-900 md:px-4 pb-8 md:pb-0 border-b md:border-b-0">
+            <div className="text-xs font-mono text-neutral-600 uppercase tracking-widest mb-8 md:mb-12">Feature // 02</div>
             <div className="w-12 h-12 bg-black border border-neutral-800 flex items-center justify-center">
               <SlidersHorizontal className="w-5 h-5 text-optic-cyan" />
             </div>
@@ -144,8 +144,8 @@ export default function LandingPage() {
             <p className="text-neutral-500 leading-relaxed font-mono text-sm">Strip ISO grain and sensor noise from night footage frame-by-frame using targeted spatial neural networks — without softening detail.</p>
           </div>
 
-          <div className="md:col-span-4 space-y-6 pl-4">
-            <div className="text-xs font-mono text-neutral-600 uppercase tracking-widest mb-12">Feature // 03</div>
+          <div className="md:col-span-4 space-y-6 md:pl-4">
+            <div className="text-xs font-mono text-neutral-600 uppercase tracking-widest mb-8 md:mb-12">Feature // 03</div>
             <div className="w-12 h-12 bg-black border border-neutral-800 flex items-center justify-center">
               <Zap className="w-5 h-5 text-neutral-400" />
             </div>
@@ -157,7 +157,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Specifications */}
-      <section id="pricing" className="py-32 px-6 max-w-7xl mx-auto relative z-10">
+      <section id="pricing" className="py-16 md:py-32 px-4 md:px-6 max-w-7xl mx-auto relative z-10">
         <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
 
         {checkoutError && (
@@ -166,9 +166,9 @@ export default function LandingPage() {
           </div>
         )}
 
-        <div className="mb-20 relative z-10 border-b border-neutral-900 pb-8 flex justify-between items-end">
+        <div className="mb-12 md:mb-20 relative z-10 border-b border-neutral-900 pb-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
           <div>
-            <h2 className="text-4xl md:text-5xl font-black text-titanium mb-2 tracking-tighter uppercase">Simple Pricing</h2>
+            <h2 className="text-3xl md:text-5xl font-black text-titanium mb-2 tracking-tighter uppercase">Simple Pricing</h2>
             <p className="text-sm font-mono text-neutral-500 uppercase tracking-widest">Choose a plan that fits your volume</p>
           </div>
         </div>
