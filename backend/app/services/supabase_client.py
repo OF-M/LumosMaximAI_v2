@@ -2,8 +2,23 @@ import httpx
 from supabase import create_client, Client
 from app.core.config import settings
 
-# Initialize Supabase client
-supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+def _make_client() -> Client:
+    return create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+
+_client: Client | None = None
+
+def _get_client() -> Client:
+    global _client
+    if _client is None:
+        _client = _make_client()
+    return _client
+
+class _LazyClient:
+    """Proxy that initializes the Supabase client on first use."""
+    def __getattr__(self, name):
+        return getattr(_get_client(), name)
+
+supabase: Client = _LazyClient()  # type: ignore
 
 BUCKET = "raw-videos"
 
