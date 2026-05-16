@@ -44,22 +44,15 @@ LL_COLOR      = 0.25
 #   TEMPORAL_ALPHA : weight of the CURRENT enhanced frame  (0=full blend, 1=no smoothing)
 #   0.80 → 80 % current frame + 20 % previous frame  (subtle, preserves motion)
 # ---------------------------------------------------------------------------
-TEMPORAL_ALPHA = 0.80
+TEMPORAL_ALPHA = 0.85
 
 # ---------------------------------------------------------------------------
 # Unsharp masking — recovers fine detail lost during denoising (enhance mode only)
 #   SHARPEN_AMOUNT : strength of sharpening  (0=none, 0.5=moderate, 1.0=strong)
 #   SHARPEN_RADIUS : gaussian blur radius in pixels used to compute the mask
 # ---------------------------------------------------------------------------
-SHARPEN_AMOUNT = 0.7
-SHARPEN_RADIUS = 1.5
-
-# ---------------------------------------------------------------------------
-# Denoising blend — prevents over-correction on clean/low-noise footage
-#   DENOISE_BLEND : weight of model output  (0=original, 1=full model output)
-#   0.65 → 65% NAFNet + 35% original — preserves detail, prevents darkening
-# ---------------------------------------------------------------------------
-DENOISE_BLEND = 0.65
+SHARPEN_AMOUNT = 0.3
+SHARPEN_RADIUS = 1.0
 
 # ---------------------------------------------------------------------------
 # Container image — Debian Slim + CUDA PyTorch + OpenCV + Supabase
@@ -506,16 +499,11 @@ def _process_frames_gpu_combined(input_path: str, output_path: str,
             for orig, enh in zip(originals, ll_np)
         ])
 
-        # ── Step 3: NAFNet denoising + blend to preserve detail ─────────
+        # ── Step 3: NAFNet denoising ─────────────────────────────────────
         t2 = torch.from_numpy(blended).permute(0, 3, 1, 2).float().div(255.0).to(device)
         with torch.no_grad():
             dn_out = dn_model(t2)
-        dn_raw = (dn_out.permute(0, 2, 3, 1).cpu().numpy() * 255).clip(0, 255).astype(np.uint8)
-        dn_np = np.clip(
-            DENOISE_BLEND * dn_raw.astype(np.float32) +
-            (1.0 - DENOISE_BLEND) * blended.astype(np.float32),
-            0, 255
-        ).astype(np.uint8)
+        dn_np = (dn_out.permute(0, 2, 3, 1).cpu().numpy() * 255).clip(0, 255).astype(np.uint8)
 
         # ── Step 4: Temporal smoothing ───────────────────────────────────
         # ── Step 5: Unsharp mask — recover detail lost by denoiser ─────
@@ -717,20 +705,9 @@ def process_video(job_id: str, video_url: str, task_type: str = "denoising"):
 
             else:
                 try:
-                    import numpy as np
                     model = _load_denoiser(device)
-                    log.info(f"[{job_id}] Denoiser loaded — running GPU inference (blend={DENOISE_BLEND})…")
-                    def _denoise_postprocess(orig, enhanced):
-                        return np.clip(
-                            DENOISE_BLEND * enhanced.astype(np.float32) +
-                            (1.0 - DENOISE_BLEND) * orig.astype(np.float32),
-                            0, 255
-                        ).astype(np.uint8)
-                    _process_frames_gpu(
-                        input_path, output_path, model, device,
-                        batch_size=2,
-                        postprocess_fn=_denoise_postprocess,
-                    )
+                    log.info(f"[{job_id}] Denoiser loaded — running GPU inference…")
+                    _process_frames_gpu(input_path, output_path, model, device, batch_size=2)
                 except Exception as exc:
                     log.warning(f"[{job_id}] Denoiser failed ({exc}) — using NL-Means fallback")
                     _denoise_fallback(input_path, output_path)

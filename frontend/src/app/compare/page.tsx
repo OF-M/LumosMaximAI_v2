@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import { ArrowLeft, Loader2, Download, Play, Pause } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +22,137 @@ function formatTime(s: number) {
 }
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://127.0.0.1:8000";
+const ZOOM = 1.5;
+const LENS_SIZE = 180;
+
+interface VideoPanelProps {
+    videoRef: React.RefObject<HTMLVideoElement | null>;
+    src: string;
+    videoProps: React.VideoHTMLAttributes<HTMLVideoElement>;
+    labelLeft: React.ReactNode;
+    labelRight?: React.ReactNode;
+    borderRight?: boolean;
+}
+
+function VideoPanel({ videoRef, src, videoProps, labelLeft, labelRight, borderRight }: VideoPanelProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const lensRef = useRef<HTMLCanvasElement>(null);
+    const mouseRef = useRef<{ x: number; y: number } | null>(null);
+    const rafRef = useRef<number>(0);
+    const [hovered, setHovered] = useState(false);
+
+    const drawLens = useCallback(() => {
+        const video = videoRef.current;
+        const canvas = lensRef.current;
+        const container = containerRef.current;
+        const mouse = mouseRef.current;
+        if (!video || !canvas || !container || !mouse || video.readyState < 2) return;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        const cW = container.clientWidth;
+        const cH = container.clientHeight;
+        const vAspect = video.videoWidth / video.videoHeight;
+        const cAspect = cW / cH;
+
+        let rW: number, rH: number, oX: number, oY: number;
+        if (vAspect > cAspect) {
+            rW = cW;
+            rH = cW / vAspect;
+            oX = 0;
+            oY = (cH - rH) / 2;
+        } else {
+            rH = cH;
+            rW = cH * vAspect;
+            oX = (cW - rW) / 2;
+            oY = 0;
+        }
+
+        const relX = mouse.x - oX;
+        const relY = mouse.y - oY;
+
+        // If cursor is outside the rendered video area, clear and return
+        if (relX < 0 || relX > rW || relY < 0 || relY > rH) {
+            ctx.clearRect(0, 0, LENS_SIZE, LENS_SIZE);
+            return;
+        }
+
+        const scaleX = video.videoWidth / rW;
+        const scaleY = video.videoHeight / rH;
+        const srcSize = LENS_SIZE / ZOOM;
+        const sx = Math.max(0, Math.min(relX * scaleX - srcSize / 2, video.videoWidth - srcSize));
+        const sy = Math.max(0, Math.min(relY * scaleY - srcSize / 2, video.videoHeight - srcSize));
+
+        ctx.clearRect(0, 0, LENS_SIZE, LENS_SIZE);
+
+        // Draw zoomed frame (square, no clip)
+        ctx.drawImage(video, sx, sy, srcSize, srcSize, 0, 0, LENS_SIZE, LENS_SIZE);
+
+        // Border
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(0.75, 0.75, LENS_SIZE - 1.5, LENS_SIZE - 1.5);
+
+        // Center canvas on cursor
+        canvas.style.left = `${mouse.x - LENS_SIZE / 2}px`;
+        canvas.style.top = `${mouse.y - LENS_SIZE / 2}px`;
+    }, [videoRef]);
+
+    useEffect(() => {
+        if (!hovered) return;
+        const loop = () => {
+            drawLens();
+            rafRef.current = requestAnimationFrame(loop);
+        };
+        rafRef.current = requestAnimationFrame(loop);
+        return () => cancelAnimationFrame(rafRef.current);
+    }, [hovered, drawLens]);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+
+    return (
+        <div className={`flex-1 flex flex-col min-w-0 ${borderRight ? "border-r border-neutral-900" : ""}`}>
+            <div className="px-5 py-3 border-b border-neutral-900 shrink-0 flex items-center justify-between">
+                {labelLeft}
+                {labelRight}
+            </div>
+            <div
+                ref={containerRef}
+                className="flex-1 bg-black flex items-center justify-center min-h-0 overflow-hidden relative"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => { setHovered(false); mouseRef.current = null; }}
+            >
+                <video
+                    ref={videoRef}
+                    src={src}
+                    className="w-full h-full object-contain"
+                    {...videoProps}
+                />
+                {hovered && (
+                    <canvas
+                        ref={lensRef}
+                        width={LENS_SIZE}
+                        height={LENS_SIZE}
+                        className="absolute pointer-events-none"
+                        style={{
+                            width: LENS_SIZE,
+                            height: LENS_SIZE,
+                            left: 0,
+                            top: 0,
+                            filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.7))",
+                        }}
+                    />
+                )}
+            </div>
+        </div>
+    );
+}
 
 export default function Compare() {
     const { user, loading: authLoading } = useRequireAuth();
@@ -69,15 +200,11 @@ export default function Compare() {
     const handleEnded = () => setPlaying(false);
 
     const handleTimeUpdate = () => {
-        if (originalRef.current) {
-            setCurrentTime(originalRef.current.currentTime);
-        }
+        if (originalRef.current) setCurrentTime(originalRef.current.currentTime);
     };
 
     const handleLoadedMetadata = () => {
-        if (originalRef.current) {
-            setDuration(originalRef.current.duration);
-        }
+        if (originalRef.current) setDuration(originalRef.current.duration);
     };
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,42 +266,30 @@ export default function Compare() {
 
             {/* Videos */}
             <div className="flex flex-1 z-10 min-h-0">
-                {/* Original */}
-                <div className="flex-1 flex flex-col border-r border-neutral-900 min-w-0">
-                    <div className="px-5 py-3 border-b border-neutral-900 shrink-0 flex items-center">
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">Original</span>
-                    </div>
-                    <div className="flex-1 bg-black flex items-center justify-center min-h-0 overflow-hidden">
-                        <video
-                            ref={originalRef}
-                            src={originalUrl}
-                            className="w-full h-full object-contain"
-                            playsInline
-                            muted
-                            onEnded={handleEnded}
-                            onTimeUpdate={handleTimeUpdate}
-                            onLoadedMetadata={handleLoadedMetadata}
-                        />
-                    </div>
-                </div>
-
-                {/* Enhanced */}
-                <div className="flex-1 flex flex-col min-w-0">
-                    <div className="px-5 py-3 border-b border-neutral-900 flex items-center justify-between shrink-0">
-                        <span className="font-mono text-[10px] uppercase tracking-widest text-white">Enhanced</span>
-                        <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                    </div>
-                    <div className="flex-1 bg-black flex items-center justify-center min-h-0 overflow-hidden">
-                        <video
-                            ref={enhancedRef}
-                            src={enhancedUrl}
-                            className="w-full h-full object-contain"
-                            playsInline
-                            muted
-                            onEnded={handleEnded}
-                        />
-                    </div>
-                </div>
+                <VideoPanel
+                    videoRef={originalRef}
+                    src={originalUrl}
+                    borderRight
+                    labelLeft={<span className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">Original</span>}
+                    videoProps={{
+                        playsInline: true,
+                        muted: true,
+                        onEnded: handleEnded,
+                        onTimeUpdate: handleTimeUpdate,
+                        onLoadedMetadata: handleLoadedMetadata,
+                    }}
+                />
+                <VideoPanel
+                    videoRef={enhancedRef}
+                    src={enhancedUrl}
+                    labelLeft={<span className="font-mono text-[10px] uppercase tracking-widest text-white">Enhanced</span>}
+                    labelRight={<span className="w-1.5 h-1.5 bg-white rounded-full" />}
+                    videoProps={{
+                        playsInline: true,
+                        muted: true,
+                        onEnded: handleEnded,
+                    }}
+                />
             </div>
 
             {/* Controls */}
@@ -185,20 +300,16 @@ export default function Compare() {
                         {formatTime(currentTime)}
                     </span>
                     <div className="relative flex-1 flex items-center group" style={{ height: 24 }}>
-                        {/* Track background */}
                         <div className="absolute left-0 right-0 h-px bg-neutral-800 group-hover:h-[2px] transition-all duration-150">
-                            {/* Progress fill */}
                             <div
                                 className="absolute top-0 left-0 h-full bg-white"
                                 style={{ width: `${progress}%` }}
                             />
                         </div>
-                        {/* Thumb dot */}
                         <div
                             className="absolute w-3 h-3 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 top-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none"
                             style={{ left: `${progress}%` }}
                         />
-                        {/* Invisible interactive range input */}
                         <input
                             type="range"
                             min={0}
