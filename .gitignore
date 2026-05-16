@@ -1,0 +1,30 @@
+# Environment variables — never commit these
+.env
+.env.local
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.egg-info/
+
+# Logs
+*.log
+*.log.err
+uvicorn*.log
+uvicorn*.err
+frontend_dev.*
+-w
+
+# Next.js
+frontend/.next/
+frontend/node_modules/
+frontend/.env.local
+
+# Misc
+.DS_Store
+.claude/
+tsconfig.tsbuildinfo
